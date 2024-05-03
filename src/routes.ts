@@ -1,6 +1,12 @@
 import express from 'express';
 const route = express.Router();
 
+import {registerClient} from './controllers/ClientController'
+import {} from './controllers/ProductController'
+import {} from './controllers/ProductorController'
+
+
+route.post("/client/register", registerClient)
 /*
 
 get-products/limits=x
