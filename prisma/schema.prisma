@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String   @map("nome")
+  CPF       String   @unique
+  email     String   @unique
+  password  String   @map("senha")
+  createdAt DateTime @default(now())
+
+  clientAddress     ClientAddress[]
+  InteractionClient InteractionClient[]
+  recreatePassword  RecreatePassword[]
+  LogVenda          LogSales[]
+
+  @@map("clientes")
+}
+
+model InteractionClient {
+  id           BigInt   @id @default(autoincrement())
+  liked        Boolean  @map("curtido")
+  shoppingCart Boolean  @map("carrinho-de-compras")
+  createdAt    DateTime @default(now()) @map("criado-em")
+  clientId     String   @map("cliente-id")
+  productId    BigInt   @map("produto_id")
+
+  product Product @relation(fields: [productId], references: [id])
+  client  Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("interacao-cliente")
+}
+
+model ClientAddress {
+  id            BigInt @id @default(autoincrement())
+  clientId      String @map("cliente-id")
+  address       String @map("endereco")
+  numberAddress Int    @map("numero")
+  district      String @map("bairro")
+  city          String @map("cidade")
+  estate        String @map("estado")
+  country       String @map("pais")
+  CEP           String @map("cep")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("endereco-cliente")
+}
+
+model Productor {
+  id          String   @id @default(uuid())
+  name        String   @map("nome")
+  companyName String   @map("razao-social")
+  fantasyName String   @map("nome-fantasia")
+  CNPJ        String   @unique
+  CPF         String   @unique
+  email       String   @unique
+  telephone   String   @map("telefone")
+  password    String   @map("senha")
+  createdAt   DateTime @default(now()) @map("criado-em")
+
+  productoAddress  ProductoAddress[]
+  recreatePassword RecreatePassword[]
+  Product          Product[]
+
+  @@map("produtores")
+}
+
+model ProductoAddress {
+  id            BigInt @id @default(autoincrement())
+  productorId   String @map("produtor_id")
+  address       String @map("endereco")
+  numberAddress Int    @map("numero")
+  district      String @map("bairro")
+  city          String @map("cidade")
+  estate        String @map("estado")
+  country       String @map("pais")
+  CEP           String @map("cep")
+
+  productor Productor @relation(fields: [productorId], references: [id], onDelete: Cascade)
+
+  @@map("endereco-produtor")
+}
+
+model RecreatePassword {
+  email                String   @unique
+  token                String
+  createdAt            DateTime @default(now()) @map("criado-em")
+  newPasswordProductor String   @map("nova-senha-produtor")
+  newPasswordClient    String   @map("nova-senha-cliente")
+  productorId          String   @map("produtor_id")
+  clientId             String   @map("cliente_id")
+
+  productor Productor @relation(fields: [productorId], references: [id], onDelete: Cascade)
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([email, token])
+  @@map("recriar-senha")
+}
+
+model Product {
+  id                BigInt              @id @default(autoincrement())
+  description       String              @map("descricao")
+  title             String              @map("titulo")
+  price             Decimal             @map("preco") @db.Decimal(10, 2)
+  quantity          BigInt              @map("quantidade")
+  createdAt         DateTime            @default(now()) @map("criado-em")
+  productorId       String              @map("produtor_id")
+  logVendaId        BigInt
+  InteractionClient InteractionClient[]
+  productReviews    productReviews[]
+
+  productor Productor @relation(fields: [productorId], references: [id])
+  logSales  LogSales  @relation(fields: [logVendaId], references: [id])
+
+  @@map("produtos")
+}
+
+model productReviews {
+  id            BigInt   @id @default(autoincrement())
+  title         String   @map("titulo")
+  description   String   @map("descricao")
+  numberReviews Int      @map("numero-avaliacoes")
+  productId     BigInt   @map("produto_id")
+  createdAt     DateTime @default(now()) @map("criado-em")
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("comentario-produtos")
+}
+
+model LogSales {
+  id       BigInt    @id @default(autoincrement())
+  clientId String
+  soldIn   DateTime  @default(now()) @map("vendido-em")
+  Product  Product[]
+
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@map("log-vendas")
+}
