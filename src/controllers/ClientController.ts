@@ -15,7 +15,7 @@ export async function registerClient(req: Request, res: Response) {
     
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        await prisma.client.create({
+        const teste = await prisma.client.create({
             data: {
                 name,
                 email,
@@ -23,6 +23,7 @@ export async function registerClient(req: Request, res: Response) {
                 password: hashedPassword
             }
         })
+        console.log(teste)
         return res.status(201).json({ message: 'Client created successfully' })
     } catch (error) {
         return res.status(500).json({ messageError: 'Internal Server Error' })
