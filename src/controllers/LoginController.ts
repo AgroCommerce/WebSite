@@ -1,27 +1,28 @@
 import 'dotenv/config';
 
 import { Request, Response } from 'express';
-import { Client } from '../types/ClientType';
 import { prisma } from '../lib/prisma'
 import bcrypt from 'bcryptjs'
 
 import jwt from 'jsonwebtoken';
 
 export async function login(req: Request, res: Response) {
-    const { email, password } = req.body as Client
+    const { email, password } = req.body
 
-    const client = await prisma.client.findFirst({
+    let user = await prisma.user.findUnique({
         where: {
             email,
-            password
         }
     })
 
-    if (!client) return res.status(404).json({ messageError: 'Client not found' })
-    if (client.email !== email) return res.status(401).json({ messageError: 'Invalid email' })
+    if (!user) {
+        return res.status(404).json({ messageError: 'Client not found' })  
+    } 
+
+    if (user.email !== email) return res.status(401).json({ messageError: 'Invalid email' })
     
     try {
-        const isMatch = await bcrypt.compare(password, client.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
 
         const secret = process.env.SECRET as jwt.Secret

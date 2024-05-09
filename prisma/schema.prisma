@@ -9,43 +9,48 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
+  // url      = env("DATABASE_URL")
 }
 
-model Client {
-  id        String   @id @default(uuid())
-  name      String   @map("nome")
-  CPF       String   @unique
-  email     String   @unique
-  password  String   @map("senha")
-  createdAt DateTime @default(now())
+model User {
+  id         String   @id @default(uuid())
+  producerId String?  @map("produtor_id")
+  name       String   @map("nome")
+  cpf        String   @unique
+  email      String   @unique
+  password   String   @map("senha")
+  roles      String   @default("USER") @map("cargo") // change to enum on mysql
+  createdAt  DateTime @default(now())
 
-  clientAddress     ClientAddress[]
-  InteractionClient InteractionClient[]
-  recreatePassword  RecreatePassword[]
-  LogVenda          LogSales[]
+  producer Producer? @relation(fields: [producerId], references: [id], onDelete: Cascade)
 
-  @@map("clientes")
+  userAddress      UserAddress[]
+  interactionUser  InteractionUser[]
+  recreatePassword RecreatePassword[]
+  logSales         LogSales[]
+
+  @@map("usuarios")
 }
 
-model InteractionClient {
+model InteractionUser {
   id           BigInt   @id @default(autoincrement())
   liked        Boolean  @map("curtido")
   shoppingCart Boolean  @map("carrinho-de-compras")
   createdAt    DateTime @default(now()) @map("criado-em")
-  clientId     String   @map("cliente-id")
+  userId       String   @map("cliente_id")
   productId    BigInt   @map("produto_id")
 
   product Product @relation(fields: [productId], references: [id])
-  client  Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("interacao-cliente")
+  @@map("interacao-usuario")
 }
 
-model ClientAddress {
+model UserAddress {
   id            BigInt @id @default(autoincrement())
-  clientId      String @map("cliente-id")
+  userId        String @map("cliente_id")
   address       String @map("endereco")
   numberAddress Int    @map("numero")
   district      String @map("bairro")
@@ -54,76 +59,52 @@ model ClientAddress {
   country       String @map("pais")
   CEP           String @map("cep")
 
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("endereco-cliente")
+  @@map("endereco-usuario")
 }
 
-model Productor {
-  id          String   @id @default(uuid())
-  name        String   @map("nome")
-  companyName String   @map("razao-social")
-  fantasyName String   @map("nome-fantasia")
-  CNPJ        String   @unique
-  CPF         String   @unique
-  email       String   @unique
-  telephone   String   @map("telefone")
-  password    String   @map("senha")
-  createdAt   DateTime @default(now()) @map("criado-em")
+model Producer {
+  id          String @id @default(uuid())
+  companyName String @map("razao-social")
+  cnpj        String @unique
+  telephone   BigInt @map("telefone")
 
-  productoAddress  ProductoAddress[]
-  recreatePassword RecreatePassword[]
-  Product          Product[]
+  Product Product[]
+  User    User[]
 
   @@map("produtores")
 }
 
-model ProductoAddress {
-  id            BigInt @id @default(autoincrement())
-  productorId   String @map("produtor_id")
-  address       String @map("endereco")
-  numberAddress Int    @map("numero")
-  district      String @map("bairro")
-  city          String @map("cidade")
-  estate        String @map("estado")
-  country       String @map("pais")
-  CEP           String @map("cep")
-
-  productor Productor @relation(fields: [productorId], references: [id], onDelete: Cascade)
-
-  @@map("endereco-produtor")
-}
-
 model RecreatePassword {
-  email                String   @unique
-  token                String
-  createdAt            DateTime @default(now()) @map("criado-em")
-  newPasswordProductor String   @map("nova-senha-produtor")
-  newPasswordClient    String   @map("nova-senha-cliente")
-  productorId          String   @map("produtor_id")
-  clientId             String   @map("cliente_id")
+  email           String   @unique
+  token           String
+  createdAt       DateTime @default(now()) @map("criado-em")
+  newPasswordUser String   @map("nova-senha-usuario")
+  productorId     String   @map("produtor_id")
+  userId          String   @map("cliente_id")
 
-  productor Productor @relation(fields: [productorId], references: [id], onDelete: Cascade)
-  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([email, token])
   @@map("recriar-senha")
 }
 
 model Product {
-  id                BigInt              @id @default(autoincrement())
-  description       String              @map("descricao")
-  title             String              @map("titulo")
-  price             Decimal             @map("preco") @db.Decimal(10, 2)
-  quantity          BigInt              @map("quantidade")
-  createdAt         DateTime            @default(now()) @map("criado-em")
-  productorId       String              @map("produtor_id")
-  logVendaId        BigInt
-  InteractionClient InteractionClient[]
-  productReviews    productReviews[]
+  id          BigInt   @id @default(autoincrement())
+  description String   @map("descricao")
+  title       String   @map("titulo")
+  price       Decimal  @map("preco")
+  quantity    BigInt   @map("quantidade")
+  createdAt   DateTime @default(now()) @map("criado-em")
+  producerId  String   @map("produtor_id")
+  logVendaId  BigInt
 
-  productor Productor @relation(fields: [productorId], references: [id])
-  logSales  LogSales  @relation(fields: [logVendaId], references: [id])
+  interactionUser InteractionUser[]
+  productReviews  productReviews[]
+
+  producer Producer @relation(fields: [producerId], references: [id])
+  logSales LogSales @relation(fields: [logVendaId], references: [id])
 
   @@map("produtos")
 }
@@ -142,12 +123,18 @@ model productReviews {
 }
 
 model LogSales {
-  id       BigInt    @id @default(autoincrement())
-  clientId String
-  soldIn   DateTime  @default(now()) @map("vendido-em")
-  Product  Product[]
+  id      BigInt    @id @default(autoincrement())
+  userId  String
+  soldIn  DateTime  @default(now()) @map("vendido-em")
+  Product Product[]
 
-  client Client @relation(fields: [clientId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("log-vendas")
 }
+
+// enum Role {
+//   ADMIN
+//   PRODUCER
+//   USER
+// }

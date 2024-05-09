@@ -1,10 +1,11 @@
 import 'dotenv/config'
 
+import { Request, Response, NextFunction } from 'express';
 import jwt, { Secret } from 'jsonwebtoken'
 
-export const checkToken = (req:any, res:any, next:any) => {
+export const checkToken = (req:Request, res:Response, next:NextFunction) => {
     const authHeader = req.headers['Authorization']
-    const token = authHeader && authHeader.split(' ')[1]
+    const token = authHeader && authHeader[1]
 
     if(!token) return res.status(401).json({ messageError: 'Unauthorized' })
 
