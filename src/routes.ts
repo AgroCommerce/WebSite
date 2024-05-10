@@ -1,18 +1,18 @@
 import express from 'express';
 const route = express.Router();
 
-import {registerClient, getClients} from './controllers/ClientController'
+import {addUserAddress, registerClient, registerProducer} from './controllers/UserController'
 import {  } from './controllers/ProductController'
-import {registerProducer, getProducers} from './controllers/ProducerController'
 import { login } from './controllers/LoginController'
 
 
 route.post("/client/register", registerClient)
-route.get("/clients", getClients)
+route.post("/register/:id/producer", registerProducer)
+
+route.post("/add/:id/address", addUserAddress)
+
 route.post("/login", login)
 
-route.post("/producer/register", registerProducer)
-route.get("/producers", getProducers)
 /*
 
 get-products/limits=x
