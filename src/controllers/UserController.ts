@@ -1,7 +1,7 @@
 import 'dotenv/config';
 
 import { Request, Response } from 'express';
-import { User, Producer, UserAddress } from '@prisma/client';
+import { User, Producer, UserAddress } from "@prisma/client";
 import { prisma } from '../lib/prisma'
 
 import bcrypt from 'bcryptjs'
@@ -71,6 +71,7 @@ export async function registerProducer(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'Producer created successfully' })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
@@ -105,7 +106,7 @@ export async function addUserAddress(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'Address added successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
+

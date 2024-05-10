@@ -8,6 +8,7 @@ import { login } from './controllers/LoginController'
 
 route.post("/client/register", registerClient)
 route.post("/register/:id/producer", registerProducer)
+route.post("register/:producerId/product")
 
 route.post("/add/:id/address", addUserAddress)
 
