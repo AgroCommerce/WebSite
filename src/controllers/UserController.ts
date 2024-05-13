@@ -87,7 +87,7 @@ export async function addUserAddress(req: Request, res: Response) {
     if (!user) return res.status(404).json({ messageError: 'User not found' })
 
     try {
-        const teste = await prisma.userAddress.create({
+        await prisma.userAddress.create({
             data: {
                 cep,
                 address,

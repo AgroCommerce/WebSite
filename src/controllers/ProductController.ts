@@ -25,13 +25,10 @@ export async function registerProduct(req:Request, res:Response) {
                 price,
                 title,
                 quantity,
-                producerId
+                producerId,
             }
         })
+    } catch (error) {
+        return res.status(500).json({error: 'Internal Server Error'})
     }
-}
-
-export async function logSales(req:Request, res:Response) {
-
-
 }
