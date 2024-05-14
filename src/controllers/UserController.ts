@@ -112,3 +112,7 @@ export async function addUserAddress(req: Request, res: Response) {
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
+
+export async function addShoppingCart(req:Request, res:Response) {
+    
+}
