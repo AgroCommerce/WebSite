@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { Request, Response } from 'express';
 import { User, Producer, UserAddress } from "@prisma/client";
 import { prisma } from '../lib/prisma'
+import { cpf as cpfValidator, cnpj as cnpjValidator} from 'cpf-cnpj-validator';
 
 import bcrypt from 'bcryptjs'
 
@@ -12,10 +13,11 @@ export async function registerClient(req: Request, res: Response) {
 
     if (!name || !email || !cpf || !password) return res.status(400).json({ messageError: 'Invalid body' })
     if (password.length < 6) return res.status(400).json({ messageError: 'Password must have at least 6 characters' })
+    if (cpfValidator.isValid(cpf)) return res.status(401).json({ messageError: 'Invalid CPF' })
 
     try {
         const user = await prisma.user.findFirst({
-            where: { email }
+            where: { cpf }
         })
         if (user) return res.status(409).json({ messageError: 'User already exists' })
 
@@ -40,6 +42,7 @@ export async function registerProducer(req: Request, res: Response) {
     const { id } = req.params
 
     if (!cnpj || !companyName || !telephone) return res.status(400).json({ messageError: 'Invalid body' })
+    if(cnpjValidator.isValid(cnpj)) return res.status(401).json({ messageError: 'Invalid CNPJ' })
 
     try {
         const user = await prisma.user.findUnique({
@@ -109,4 +112,3 @@ export async function addUserAddress(req: Request, res: Response) {
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
-

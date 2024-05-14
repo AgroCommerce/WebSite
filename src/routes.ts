@@ -2,13 +2,15 @@ import express from 'express';
 const route = express.Router();
 
 import {addUserAddress, registerClient, registerProducer} from './controllers/UserController'
-import {  } from './controllers/ProductController'
+import { registerProduct } from './controllers/ProductController'
 import { login } from './controllers/LoginController'
+
+import { checkToken } from './middlewares/AuthToken'
 
 
 route.post("/client/register", registerClient)
 route.post("/register/:id/producer", registerProducer)
-route.post("register/:producerId/product")
+route.post("/register/:producerId/product", checkToken, registerProduct)
 
 route.post("/add/:id/address", addUserAddress)
 

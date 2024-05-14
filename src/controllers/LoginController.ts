@@ -26,7 +26,7 @@ export async function login(req: Request, res: Response) {
         if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
 
         const secret = process.env.SECRET as jwt.Secret
-        const token = jwt.sign({ id: 1 }, secret)
+        const token = jwt.sign({ id: user.id, roles: user.roles }, secret)
 
         res.cookie("authLogin", token, {
             maxAge: 60 * 60 * 24 * 7,
@@ -34,7 +34,8 @@ export async function login(req: Request, res: Response) {
             secure: process.env.NODE_ENV !== 'development',
             path: '/',
         })
-
+        
+        console.log(token)
         return res.status(200).send({ message: "Authentication completed successfully" })
 
     } catch (error) {
