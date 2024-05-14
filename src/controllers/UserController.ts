@@ -13,7 +13,7 @@ export async function registerClient(req: Request, res: Response) {
 
     if (!name || !email || !cpf || !password) return res.status(400).json({ messageError: 'Invalid body' })
     if (password.length < 6) return res.status(400).json({ messageError: 'Password must have at least 6 characters' })
-    if (cpfValidator.isValid(cpf)) return res.status(401).json({ messageError: 'Invalid CPF' })
+    if (!cpfValidator.isValid(cpf)) return res.status(401).json({ messageError: 'Invalid CPF' })
 
     try {
         const user = await prisma.user.findFirst({
@@ -42,7 +42,7 @@ export async function registerProducer(req: Request, res: Response) {
     const { id } = req.params
 
     if (!cnpj || !companyName || !telephone) return res.status(400).json({ messageError: 'Invalid body' })
-    if(cnpjValidator.isValid(cnpj)) return res.status(401).json({ messageError: 'Invalid CNPJ' })
+    if(!cnpjValidator.isValid(cnpj)) return res.status(401).json({ messageError: 'Invalid CNPJ' })
 
     try {
         const user = await prisma.user.findUnique({
