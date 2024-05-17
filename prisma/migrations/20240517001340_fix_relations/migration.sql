@@ -1,14 +1,12 @@
 -- CreateTable
 CREATE TABLE "usuarios" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "produtor_id" TEXT,
     "nome" TEXT NOT NULL,
     "cpf" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "senha" TEXT NOT NULL,
     "cargo" TEXT NOT NULL DEFAULT 'USER',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "usuarios_produtor_id_fkey" FOREIGN KEY ("produtor_id") REFERENCES "produtores" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateTable
@@ -40,9 +38,11 @@ CREATE TABLE "endereco-usuario" (
 -- CreateTable
 CREATE TABLE "produtores" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
     "razao-social" TEXT NOT NULL,
     "cnpj" TEXT NOT NULL,
-    "telefone" BIGINT NOT NULL
+    "telefone" BIGINT NOT NULL,
+    CONSTRAINT "produtores_userId_fkey" FOREIGN KEY ("userId") REFERENCES "usuarios" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -62,11 +62,10 @@ CREATE TABLE "produtos" (
     "titulo" TEXT NOT NULL,
     "preco" DECIMAL NOT NULL,
     "quantidade" BIGINT NOT NULL,
+    "palavras-chaves" TEXT NOT NULL,
     "criado-em" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "produtor_id" TEXT NOT NULL,
-    "logVendaId" BIGINT NOT NULL,
-    CONSTRAINT "produtos_produtor_id_fkey" FOREIGN KEY ("produtor_id") REFERENCES "produtores" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "produtos_logVendaId_fkey" FOREIGN KEY ("logVendaId") REFERENCES "log-vendas" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "produtos_produtor_id_fkey" FOREIGN KEY ("produtor_id") REFERENCES "produtores" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -81,11 +80,13 @@ CREATE TABLE "comentario-produtos" (
 );
 
 -- CreateTable
-CREATE TABLE "log-vendas" (
+CREATE TABLE "vendas" (
     "id" BIGINT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL,
+    "productId" BIGINT NOT NULL,
     "vendido-em" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "log-vendas_userId_fkey" FOREIGN KEY ("userId") REFERENCES "usuarios" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "vendas_productId_fkey" FOREIGN KEY ("productId") REFERENCES "produtos" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "vendas_userId_fkey" FOREIGN KEY ("userId") REFERENCES "usuarios" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex
@@ -93,6 +94,9 @@ CREATE UNIQUE INDEX "usuarios_cpf_key" ON "usuarios"("cpf");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "usuarios_email_key" ON "usuarios"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "produtores_userId_key" ON "produtores"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "produtores_cnpj_key" ON "produtores"("cnpj");

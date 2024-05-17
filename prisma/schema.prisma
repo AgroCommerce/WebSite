@@ -15,17 +15,15 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  producerId String?  @map("produtor_id")
-  name       String   @map("nome")
-  cpf        String   @unique
-  email      String   @unique
-  password   String   @map("senha")
-  roles      String   @default("USER") @map("cargo") // change to enum on mysql
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String   @map("nome")
+  cpf       String   @unique
+  email     String   @unique
+  password  String   @map("senha")
+  roles     String   @default("USER") @map("cargo") // change to enum on mysql
+  createdAt DateTime @default(now())
 
-  producer Producer? @relation(fields: [producerId], references: [id], onDelete: Cascade)
-
+  producer         Producer?
   userAddress      UserAddress[]
   interactionUser  InteractionUser[]
   recreatePassword RecreatePassword[]
@@ -35,15 +33,15 @@ model User {
 }
 
 model InteractionUser {
-  id           BigInt   @id @default(autoincrement())
-  liked        Boolean  @map("curtido")
-  shoppingCart Boolean  @map("carrinho-de-compras")
+  id           Int   @id @default(autoincrement())
+  liked        Boolean  @map("curtido") @default(false)
+  shoppingCart Boolean  @map("carrinho-de-compras") @default(false)
   createdAt    DateTime @default(now()) @map("criado-em")
   userId       String   @map("usuario_id")
-  productId    BigInt   @map("produto_id")
+  productId    Int?   @map("produto_id")
 
-  product Product @relation(fields: [productId], references: [id])
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("interacao-usuario")
 }
@@ -66,12 +64,13 @@ model UserAddress {
 
 model Producer {
   id          String @id @default(uuid())
+  userId      String @unique
   companyName String @map("razao-social")
   cnpj        String @unique
   telephone   BigInt @map("telefone")
 
+  user    User      @relation(fields: [userId], references: [id])
   product Product[]
-  user    User[]
 
   @@map("produtores")
 }
@@ -90,7 +89,7 @@ model RecreatePassword {
 }
 
 model Product {
-  id          BigInt   @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   description String   @map("descricao")
   title       String   @map("titulo")
   price       Decimal  @map("preco")
@@ -109,11 +108,11 @@ model Product {
 }
 
 model ProductReviews {
-  id            BigInt   @id @default(autoincrement())
+  id            Int   @id @default(autoincrement())
   title         String   @map("titulo")
   description   String   @map("descricao")
   numberReviews Int      @map("numero-avaliacoes")
-  productId     BigInt   @map("produto_id")
+  productId     Int   @map("produto_id")
   createdAt     DateTime @default(now()) @map("criado-em")
 
   product Product @relation(fields: [productId], references: [id])
@@ -124,7 +123,7 @@ model ProductReviews {
 model Sales {
   id        BigInt   @id @default(autoincrement())
   userId    String
-  productId BigInt
+  productId Int
   soldIn    DateTime @default(now()) @map("vendido-em")
 
   product Product @relation(fields: [productId], references: [id])

@@ -1,5 +1,3 @@
-import 'dotenv/config';
-
 import { Request, Response } from 'express';
 import { User, Producer, UserAddress } from "@prisma/client";
 import { prisma } from '../lib/prisma'
@@ -16,7 +14,7 @@ export async function registerClient(req: Request, res: Response) {
     if (!cpfValidator.isValid(cpf)) return res.status(401).json({ messageError: 'Invalid CPF' })
 
     try {
-        const user = await prisma.user.findFirst({
+        const user = await prisma.user.findUnique({
             where: { cpf }
         })
         if (user) return res.status(409).json({ messageError: 'User already exists' })
@@ -83,6 +81,12 @@ export async function addUserAddress(req: Request, res: Response) {
     const { cep, address, city, country, district, estate, numberAddress } = req.body as UserAddress
     const { id } = req.params
 
+    // const user2 = await prisma.user.findMany({
+    //     take: 5, -> quantidade de itens
+    //     skip: 0  -> pular os itens: take 5(pag 1) skip 0; take 5: (pag2) skip:5; take 5: (pag3) skip: 10...;
+    //     orderBy: ordena por ordem cres ou desc.
+    // })
+
     const user = await prisma.user.findUnique({
         where: { id }
     })
@@ -113,6 +117,3 @@ export async function addUserAddress(req: Request, res: Response) {
     }
 }
 
-export async function addShoppingCart(req:Request, res:Response) {
-    
-}
