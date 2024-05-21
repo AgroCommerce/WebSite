@@ -16,20 +16,6 @@ export async function login(req: Request, res: Response) {
 
         if (!user) return res.status(404).json({ messageError: 'Client not found' })
 
-        const userInteractions = await prisma.interactionUser.findMany({
-            where: {
-                userId: user.id
-            }
-        })
-
-        if (userInteractions.length === 0) {
-            await prisma.interactionUser.create({
-                data: {
-                    userId: user.id,
-                }
-            })
-        }
-
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
 

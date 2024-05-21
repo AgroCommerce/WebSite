@@ -6,7 +6,7 @@ import { cpf as cpfValidator, cnpj as cnpjValidator} from 'cpf-cnpj-validator';
 import bcrypt from 'bcryptjs'
 
 // post
-export async function registerClient(req: Request, res: Response) {
+export async function registerUser(req: Request, res: Response) {
     const { name, email, cpf, password } = req.body as User
 
     if (!name || !email || !cpf || !password) return res.status(400).json({ messageError: 'Invalid body' })

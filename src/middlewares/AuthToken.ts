@@ -1,13 +1,13 @@
 import 'dotenv/config'
 
 import { Request, Response, NextFunction } from 'express';
-import jwt, { Secret, Jwt } from 'jsonwebtoken'
+import jwt, { Secret } from 'jsonwebtoken'
 
-interface Payload {
-    id: string
-    roles: string
-    iat: number
-}
+// interface Payload {
+//     id: string
+//     roles: string
+//     iat: number
+// }
 
 export const checkToken = (req:Request, res:Response, next:NextFunction) => {
     const authHeader = req.headers['authorization'] as string
@@ -18,9 +18,9 @@ export const checkToken = (req:Request, res:Response, next:NextFunction) => {
     try {
         const secret = process.env.SECRET as Secret
         jwt.verify(token, secret)
-        const decodedToken = jwt.decode(token, {complete: true, json: true})
-        const payload  = decodedToken?.payload as Payload
-        if(payload.roles !== 'PRODUCER') return res.status(401).json({ messageError: 'Unauthorized, you must to be a PRODUCER' })
+        // const decodedToken = jwt.decode(token, {complete: true, json: true})
+        // const payload  = decodedToken?.payload as Payload
+        // if(payload.roles !== 'PRODUCER') return res.status(401).json({ messageError: 'Unauthorized, you must to be a PRODUCER' })
         next()
         
     } catch (error) {

@@ -1,20 +1,20 @@
 import express from 'express';
 const route = express.Router();
 
-import {addUserAddress, registerClient, registerProducer} from './controllers/UserController'
+import {addUserAddress, registerUser, registerProducer} from './controllers/UserController'
 import { registerProduct, addShoppingCart } from './controllers/ProductController'
 import { login } from './controllers/LoginController'
 
 import { checkToken } from './middlewares/AuthToken'
 
 
-route.post("/client/register", registerClient)
+route.post("/user/register", registerUser)
 route.post("/register/:id/producer", registerProducer)
 route.post("/register/:producerId/product", checkToken, registerProduct)
 
 route.post("/add/:id/address", addUserAddress) 
-route.post("/add/:clientId/shoppingCart", addShoppingCart)
-route.post("/login", login)
+route.post("/add/:userId/shoppingCart", addShoppingCart)
+route.post("/auth/login", login)
 
 /*
 
