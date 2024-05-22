@@ -10,7 +10,7 @@ import { checkToken } from './middlewares/AuthToken'
 //adicionar middleware de autenticação de login nas rotas de add
 
 route.post("/user/register", registerUser)
-route.post("/register/:producerId/producer", registerProducer) // nesse tbm adicionar middleware de autenticação de login
+route.post("/register/:userId/producer", registerProducer) // nesse tbm adicionar middleware de autenticação de login
 
 route.post("/register/:producerId/product", checkToken, registerProduct)
 

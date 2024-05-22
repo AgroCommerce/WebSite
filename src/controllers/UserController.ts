@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { User, Producer, UserAddress, Product } from "@prisma/client";
 import { prisma } from '../lib/prisma'
-import { cpf as cpfValidator, cnpj as cnpjValidator } from 'cpf-cnpj-validator';
+import { CpfCnpjUtils } from '../utils/validator'
 
 import bcrypt from 'bcryptjs'
+import { number } from 'zod';
 
 // post
 export async function registerUser(req: Request, res: Response) {
@@ -11,14 +12,21 @@ export async function registerUser(req: Request, res: Response) {
 
     if (!name || !email || !cpf || !password) return res.status(400).json({ messageError: 'Invalid body' })
     if (password.length < 6) return res.status(400).json({ messageError: 'Password must have at least 6 characters' })
-    // if (!cpfValidator.isValid(cpf)) return res.status(401).json({ messageError: 'Invalid CPF' }) ver dps
+    if (!CpfCnpjUtils.isCpfValid(cpf.toString())) return res.status(401).json({ messageError: 'Invalid CPF' })
+    if (typeof cpf !== 'number') return res.status(401).json({ messageError: 'CPF must to be a number' })
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { cpf }
-        })
-        if (user) return res.status(409).json({ messageError: 'User already exists' })
 
+        const user = await prisma.user.findFirst({
+            where: { 
+                OR: [
+                    { cpf },
+                    { email }
+                ]
+            }
+        })
+
+        if (user) return res.status(409).json({ messageError: 'User already exists' })
         const hashedPassword = await bcrypt.hash(password, 10);
         await prisma.user.create({
             data: {
@@ -31,22 +39,28 @@ export async function registerUser(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'User created successfully' })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
 
 export async function registerProducer(req: Request, res: Response) {
     const { cnpj, companyName, telephone } = req.body as Producer
-    const { producerId } = req.params
+    const { userId } = req.params
 
     if (!cnpj || !companyName || !telephone) return res.status(400).json({ messageError: 'Invalid body' })
-    // if (!cnpjValidator.isValid(cnpj)) return res.status(401).json({ messageError: 'Invalid CNPJ' })  ver dps
+    if (!CpfCnpjUtils.isCnpjValid(cnpj.toString())) return res.status(401).json({ messageError: 'Invalid CNPJ' })
+    if (typeof cnpj !== 'number') return res.status(401).json({ messageError: 'CNPJ must to be a number' })
 
     try {
         const user = await prisma.user.findUnique({
-            where: { id: producerId }
+            where: { id: userId },
+            include: {
+                producer: true
+            }
         })
         if (!user) return res.status(404).json({ messageError: 'User not found' })
+        if(user.producer) return res.status(409).json({ messageError: 'User already is a producer' })
 
         await prisma.producer.create({
             data: {
@@ -62,7 +76,7 @@ export async function registerProducer(req: Request, res: Response) {
         })
 
         await prisma.user.update({
-            where: { id: producerId },
+            where: { id: userId },
             data: {
                 roles: {
                     set: 'PRODUCER'
