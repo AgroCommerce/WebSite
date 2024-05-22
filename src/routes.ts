@@ -1,19 +1,23 @@
 import express from 'express';
 const route = express.Router();
 
-import {addUserAddress, registerUser, registerProducer} from './controllers/UserController'
-import { registerProduct, addShoppingCart } from './controllers/ProductController'
+import {addUserAddress, registerUser, registerProducer, addLikedProducts} from './controllers/UserController'
+import { registerProduct, addShoppingCart} from './controllers/ProductController'
 import { login } from './controllers/LoginController'
 
 import { checkToken } from './middlewares/AuthToken'
 
+//adicionar middleware de autenticação de login nas rotas de add
 
 route.post("/user/register", registerUser)
-route.post("/register/:id/producer", registerProducer)
+route.post("/register/:producerId/producer", registerProducer) // nesse tbm adicionar middleware de autenticação de login
+
 route.post("/register/:producerId/product", checkToken, registerProduct)
 
-route.post("/add/:id/address", addUserAddress) 
+route.post("/add/:userId/address", addUserAddress) 
 route.post("/add/:userId/shoppingCart", addShoppingCart)
+route.post("/add/:userId/likedProducts", addLikedProducts)
+
 route.post("/auth/login", login)
 
 /*

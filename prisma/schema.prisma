@@ -9,22 +9,23 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
-  // url      = env("DATABASE_URL")
+  provider = "postgresql"
+  // url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id        String   @id @default(uuid())
   name      String   @map("nome")
-  cpf       String   @unique
+  cpf       BigInt   @unique
   email     String   @unique
   password  String   @map("senha")
-  roles     String   @default("USER") @map("cargo") // change to enum on mysql
+  roles     Role     @default(USER) @map("cargo") // change to enum on mysql
   createdAt DateTime @default(now())
 
   producer         Producer?
-  shoppingCart     ShoppingCart?
+  shoppingCart     ShoppingCart[]
+  likedProducts    LikedProducts[]
   userAddress      UserAddress[]
   recreatePassword RecreatePassword[]
   sales            Sales[]
@@ -46,14 +47,26 @@ model User {
 //   @@map("interacao-usuario")
 // }
 
-model ShoppingCart {
+model LikedProducts {
   id        Int      @id @default(autoincrement())
-  userId    String   @unique @map("usuario_id")
-  productId Int      @unique @map("produto_id")
+  userId    String   @map("usuario_id")
+  productId Int       @map("produto_id")
   createdAt DateTime @default(now()) @map("criado-em")
 
+  product Product[]
   user    User      @relation(fields: [userId], references: [id])
-  Product Product[]
+
+  @@map("produtos-curtidos")
+}
+
+model ShoppingCart {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("usuario_id")
+  productId Int      @map("produto_id")
+  createdAt DateTime @default(now()) @map("criado-em")
+
+  product Product[]
+  user    User      @relation(fields: [userId], references: [id])
 
   @@map("carrinho-de-compras")
 }
@@ -78,10 +91,10 @@ model Producer {
   id          String @id @default(uuid())
   userId      String @unique
   companyName String @map("razao-social")
-  cnpj        String @unique
+  cnpj        BigInt @unique
   telephone   BigInt @map("telefone")
 
-  user    User     @relation(fields: [userId], references: [id])
+  user    User      @relation(fields: [userId], references: [id])
   Product Product[]
 
   @@map("produtores")
@@ -101,20 +114,22 @@ model RecreatePassword {
 }
 
 model Product {
-  id             Int      @id @default(autoincrement())
-  description    String   @map("descricao")
-  title          String   @map("titulo")
-  price          Decimal  @map("preco")
-  quantity       BigInt   @map("quantidade")
-  keyWords       String   @map("palavras-chaves")
-  createdAt      DateTime @default(now()) @map("criado-em")
-  producerId     String   @unique @map("produtor_id")
-  shoppingCartId Int?
+  id              Int      @id @default(autoincrement())
+  description     String   @map("descricao")
+  title           String   @map("titulo")
+  price           Decimal  @map("preco")
+  quantity        BigInt   @map("quantidade")
+  keyWords        String   @map("palavras-chaves")
+  createdAt       DateTime @default(now()) @map("criado-em")
+  producerId      String   @map("produtor_id")
+  shoppingCartId  Int?
+  likedProductsId Int?
 
   productReviews ProductReviews[]
 
-  shoppingCart ShoppingCart? @relation(fields: [shoppingCartId], references: [id])
-  producer     Producer      @relation(fields: [producerId], references: [id])
+  producer      Producer       @relation(fields: [producerId], references: [id])
+  shoppingCart  ShoppingCart?  @relation(fields: [shoppingCartId], references: [id])
+  LikedProducts LikedProducts? @relation(fields: [likedProductsId], references: [id])
 
   @@map("produtos")
 }
@@ -138,13 +153,13 @@ model Sales {
   productId Int
   soldIn    DateTime @default(now()) @map("vendido-em")
 
-  user    User    @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("vendas")
 }
 
-// enum Role {
-//   ADMIN
-//   PRODUCER
-//   USER
-// }
+enum Role {
+  ADMIN
+  PRODUCER
+  USER
+}

@@ -17,7 +17,6 @@ export async function registerProduct(req: Request, res: Response) {
             }
         })
 
-
         if (!producer) return res.status(404).json({ error: 'Producer not found' })
 
         await prisma.product.create({
@@ -31,9 +30,8 @@ export async function registerProduct(req: Request, res: Response) {
             }
         })
 
-        res.status(201).json({ message: 'Product created successfully' })
+        return res.status(201).json({ message: 'Product created successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
@@ -41,6 +39,8 @@ export async function registerProduct(req: Request, res: Response) {
 export async function addShoppingCart(req: Request, res: Response) {
     const userId: User['id'] = req.params.userId
     const productId: Product['id'] = req.body.productId
+
+    if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
 
     const user = prisma.user.findUnique({
         where: {
@@ -60,9 +60,12 @@ export async function addShoppingCart(req: Request, res: Response) {
         if (!product) return res.status(404).json({ error: 'Product not found' })
         if (!user) return res.status(404).json({ error: 'User not found' })
 
-        const shoppingCart = await prisma.shoppingCart.findUnique({
+        const shoppingCart = await prisma.shoppingCart.findFirst({
             where: {
-                productId
+                productId,
+                AND: {
+                    userId
+                }
             }
         })
 
