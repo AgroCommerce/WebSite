@@ -14,9 +14,11 @@ route.post("/register/:userId/producer", registerProducer) // nesse tbm adiciona
 
 route.post("/register/:producerId/product", checkToken, registerProduct)
 
-route.post("/add/:userId/address", addUserAddress) 
-route.post("/add/:userId/shoppingCart", addShoppingCart)
-route.post("/add/:userId/likedProducts", addLikedProducts)
+route.post("/add/address", addUserAddress) 
+route.post("/add/shoppingCart", addShoppingCart)
+route.post("/add/likedProducts", addLikedProducts)
+
+route.post("/:userId/payment")
 
 route.post("/auth/login", login)
 

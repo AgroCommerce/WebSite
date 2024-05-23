@@ -3,8 +3,26 @@ import { User, Producer, UserAddress, Product } from "@prisma/client";
 import { prisma } from '../lib/prisma'
 import { CpfCnpjUtils } from '../utils/validator'
 
+import jwt from 'jsonwebtoken'
+import cookie from 'cookie'
 import bcrypt from 'bcryptjs'
-import { number } from 'zod';
+
+interface Cookie {
+    id: string,
+    roles: string,
+    iat: number
+}
+
+function getUserId(headers: any) {
+    const cookies = cookie.parse(headers.cookie || '')
+    const token = cookies.authLogin
+
+    if (!token) return undefined
+
+    const decoded = jwt.decode(token) as Cookie
+    return decoded.id
+}
+
 
 // post
 export async function registerUser(req: Request, res: Response) {
@@ -46,7 +64,7 @@ export async function registerUser(req: Request, res: Response) {
 
 export async function registerProducer(req: Request, res: Response) {
     const { cnpj, companyName, telephone } = req.body as Producer
-    const { userId } = req.params
+    const userId = getUserId(req.headers)
 
     if (!cnpj || !companyName || !telephone) return res.status(400).json({ messageError: 'Invalid body' })
     if (!CpfCnpjUtils.isCnpjValid(cnpj.toString())) return res.status(401).json({ messageError: 'Invalid CNPJ' })
@@ -93,7 +111,7 @@ export async function registerProducer(req: Request, res: Response) {
 
 export async function addUserAddress(req: Request, res: Response) {
     const { cep, address, city, country, district, estate, numberAddress } = req.body as UserAddress
-    const { userId } = req.params
+    const userId = getUserId(req.headers)
 
     const user = await prisma.user.findUnique({
         where: {
@@ -128,9 +146,10 @@ export async function addUserAddress(req: Request, res: Response) {
 }
 
 export async function addLikedProducts(req:Request, res:Response) {
-    const userId: User['id'] = req.params.userId
+    const userId = getUserId(req.headers)
     const productId: Product['id'] = req.body.productId
 
+    if(!userId) return res.status(401).json({ messageError: 'Unauthorized' })
     if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
 
     try {

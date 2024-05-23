@@ -2,7 +2,15 @@ import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma'
 import bcrypt from 'bcryptjs'
 
+import cookie from 'cookie'
 import jwt from 'jsonwebtoken';
+/*
+{
+  id: 'b6603c52-801c-4f3e-9df1-b0042019f727',
+  roles: 'PRODUCER',
+  iat: 1716426021
+}
+*/
 
 export async function login(req: Request, res: Response) {
     const { email, password } = req.body
@@ -13,6 +21,7 @@ export async function login(req: Request, res: Response) {
                 email,
             }
         })
+
 
         if (!user) return res.status(404).json({ messageError: 'Client not found' })
 

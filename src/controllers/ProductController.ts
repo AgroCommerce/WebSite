@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { Product, User } from "@prisma/client";
 import { prisma } from '../lib/prisma'
 
+import { getUserId } from '../utils/getHeaderData'
+
 export async function registerProduct(req: Request, res: Response) {
     const { description, title, price, quantity, keyWords } = req.body as Product
     const { producerId } = req.params
@@ -37,10 +39,11 @@ export async function registerProduct(req: Request, res: Response) {
 }
 
 export async function addShoppingCart(req: Request, res: Response) {
-    const userId: User['id'] = req.params.userId
+    const userId = getUserId(req.headers)
     const productId: Product['id'] = req.body.productId
 
     if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
+    if(!userId) return res.status(401).json({ messageError: 'You must ' })
 
     const user = prisma.user.findUnique({
         where: {
