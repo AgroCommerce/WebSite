@@ -3,26 +3,8 @@ import { User, Producer, UserAddress, Product } from "@prisma/client";
 import { prisma } from '../lib/prisma'
 import { CpfCnpjUtils } from '../utils/validator'
 
-import jwt from 'jsonwebtoken'
-import cookie from 'cookie'
+import { getUserId } from '../utils/getHeaderData'
 import bcrypt from 'bcryptjs'
-
-interface Cookie {
-    id: string,
-    roles: string,
-    iat: number
-}
-
-function getUserId(headers: any) {
-    const cookies = cookie.parse(headers.cookie || '')
-    const token = cookies.authLogin
-
-    if (!token) return undefined
-
-    const decoded = jwt.decode(token) as Cookie
-    return decoded.id
-}
-
 
 // post
 export async function registerUser(req: Request, res: Response) {

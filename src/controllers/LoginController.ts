@@ -19,6 +19,9 @@ export async function login(req: Request, res: Response) {
         let user = await prisma.user.findUnique({
             where: {
                 email,
+            },
+            include: {
+                producer: true
             }
         })
 
@@ -29,7 +32,7 @@ export async function login(req: Request, res: Response) {
         if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
 
         const secret = process.env.SECRET as jwt.Secret
-        const token = jwt.sign({ id: user.id, roles: user.roles }, secret)
+        const token = jwt.sign({ id: user.id, roles: user.roles, producerId: user?.producer?.id }, secret)
 
         res.cookie("authLogin", token, {
             maxAge: 60 * 60 * 24 * 7,

@@ -1,13 +1,15 @@
 import { Request, Response } from 'express';
-import { Product, User } from "@prisma/client";
+import { Product } from "@prisma/client";
 import { prisma } from '../lib/prisma'
 
-import { getUserId } from '../utils/getHeaderData'
+import { getProducerId, getUserId } from '../utils/getHeaderData'
 
 export async function registerProduct(req: Request, res: Response) {
     const { description, title, price, quantity, keyWords } = req.body as Product
-    const { producerId } = req.params
+    const producerId = getProducerId(req.headers)
     const apartWords = keyWords.split(',')
+
+    if(!producerId) return res.status(401).json({ messageError: 'You must be logged in to register a product' })
 
     if (!description || !title || !price || !quantity || !keyWords) return res.status(400).json({ error: 'All fields must be filled' })
     if (apartWords.length > 5 || apartWords.length < 3) return res.status(400).json({ error: 'KeyWords must have a maximum of 5 words and a minimum of 3' })
@@ -43,22 +45,23 @@ export async function addShoppingCart(req: Request, res: Response) {
     const productId: Product['id'] = req.body.productId
 
     if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
-    if(!userId) return res.status(401).json({ messageError: 'You must ' })
-
-    const user = prisma.user.findUnique({
-        where: {
-            id: userId
-        }
-    })
-
-    const product = prisma.product.findUnique({
-        where: {
-            id: productId
-        }
-    })
+    if(!userId) return res.status(401).json({ messageError: 'You must' })
 
     try {
-        await Promise.all([user, product])
+        const [product, user] = await Promise.all([
+            prisma.product.findUnique({
+                where: {
+                    id: productId
+                }
+            }),
+            prisma.user.findUnique({
+                where: {
+                    id: userId
+                }
+            })
+        ])
+
+        console.log(user, product)
 
         if (!product) return res.status(404).json({ error: 'Product not found' })
         if (!user) return res.status(404).json({ error: 'User not found' })
@@ -75,8 +78,8 @@ export async function addShoppingCart(req: Request, res: Response) {
         if (!shoppingCart) {
             await prisma.shoppingCart.create({
                 data: {
-                    userId,
-                    productId
+                    userId: user.id,
+                    productId: product.id
                 }
             })
         } else {

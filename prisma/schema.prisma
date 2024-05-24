@@ -50,7 +50,7 @@ model User {
 model LikedProducts {
   id        Int      @id @default(autoincrement())
   userId    String   @map("usuario_id")
-  productId Int       @map("produto_id")
+  productId Int      @map("produto_id")
   createdAt DateTime @default(now()) @map("criado-em")
 
   product Product[]
@@ -65,8 +65,8 @@ model ShoppingCart {
   productId Int      @map("produto_id")
   createdAt DateTime @default(now()) @map("criado-em")
 
-  product Product[]
-  user    User      @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
 
   @@map("carrinho-de-compras")
 }
@@ -122,13 +122,12 @@ model Product {
   keyWords        String   @map("palavras-chaves")
   createdAt       DateTime @default(now()) @map("criado-em")
   producerId      String   @map("produtor_id")
-  shoppingCartId  Int?
   likedProductsId Int?
 
   productReviews ProductReviews[]
+  shoppingCart   ShoppingCart[]
 
   producer      Producer       @relation(fields: [producerId], references: [id])
-  shoppingCart  ShoppingCart?  @relation(fields: [shoppingCartId], references: [id])
   LikedProducts LikedProducts? @relation(fields: [likedProductsId], references: [id])
 
   @@map("produtos")
