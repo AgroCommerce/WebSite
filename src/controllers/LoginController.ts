@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma'
 import bcrypt from 'bcryptjs'
 
-import cookie from 'cookie'
 import jwt from 'jsonwebtoken';
 /*
 {
@@ -32,7 +31,7 @@ export async function login(req: Request, res: Response) {
         if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
 
         const secret = process.env.SECRET as jwt.Secret
-        const token = jwt.sign({ id: user.id, roles: user.roles, producerId: user?.producer?.id }, secret)
+        const token = jwt.sign({ id: user.id, roles: user.roles, producerId: user.producer?.id  }, secret)
 
         res.cookie("authLogin", token, {
             maxAge: 60 * 60 * 24 * 7,
@@ -41,7 +40,7 @@ export async function login(req: Request, res: Response) {
             path: '/',
         })
 
-        console.log(token)
+        console.log(token, user.producer?.id)
         return res.status(200).send({ message: "Authentication completed successfully" })
     } catch (error) {
         return res.status(500).json({ messageError: 'Internal Server Error' })

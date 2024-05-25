@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { User, Producer, UserAddress, Product } from "@prisma/client";
+import { User, Producer, UserAddress, Product, Role } from "@prisma/client";
 import { prisma } from '../lib/prisma'
 import { CpfCnpjUtils } from '../utils/validator'
 
@@ -69,7 +69,7 @@ export async function registerProducer(req: Request, res: Response) {
                 telephone,
                 user: {
                     connect: {
-                        id: user.id
+                        id: user.id,
                     }
                 }
             }
@@ -131,27 +131,30 @@ export async function addLikedProducts(req:Request, res:Response) {
     const userId = getUserId(req.headers)
     const productId: Product['id'] = req.body.productId
 
-    if(!userId) return res.status(401).json({ messageError: 'Unauthorized' })
+    console.log(userId, productId)
     if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
+    if(!userId) return res.status(401).json({ messageError: 'You must' })
 
     try {
-        const [user, product] = await Promise.all([
-            prisma.user.findUnique({
-                where: {
-                    id: userId
-                }
-            }),
+        const [product, user] = await Promise.all([
             prisma.product.findUnique({
                 where: {
                     id: productId
                 }
+            }),
+            prisma.user.findUnique({
+                where: {
+                    id: userId
+                }
             })
         ])
-        
+
+        console.log(user, product)
+
         if (!product) return res.status(404).json({ error: 'Product not found' })
         if (!user) return res.status(404).json({ error: 'User not found' })
 
-        const likedProducts = await prisma.likedProducts.findFirst({
+        const shoppingCart = await prisma.likedProducts.findFirst({
             where: {
                 productId,
                 AND: {
@@ -160,20 +163,19 @@ export async function addLikedProducts(req:Request, res:Response) {
             }
         })
 
-        if (!likedProducts) {
+        if (!shoppingCart) {
             await prisma.likedProducts.create({
                 data: {
-                    userId,
-                    productId
+                    userId: user.id,
+                    productId: product.id
                 }
             })
         } else {
-            return res.status(400).json({ error: 'Product already in liked items' })
+            return res.status(400).json({ error: 'Product already in liked products' })
         }
 
-        return res.status(201).json({ message: 'Product added to liked items' })
+        return res.status(201).json({ message: 'Product added to liked products' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }

@@ -6,22 +6,27 @@ import { registerProduct, addShoppingCart } from './controllers/ProductControlle
 import { login } from './controllers/LoginController';
 import { sale } from './controllers/SalesController'; // Change the import statement to use default import syntax
 
-import { checkToken } from './middlewares/AuthToken';
+import { checkToken, isProducer } from './middlewares/AuthToken';
 
-//adicionar middleware de autenticação de login nas rotas de add
-
+//Rotas sem check, rotas inicias(registro do usuário e login)
 route.post("/user/register", registerUser);
-route.post("/register/:userId/producer", registerProducer); // nesse tbm adicionar middleware de autenticação de login
+route.post("/auth/login", login)
 
-route.post("/register/:producerId/product", checkToken, registerProduct);
+//Rota de registro de produtores
+route.post("/register/producer", checkToken ,registerProducer);
 
+//Rota de registro de produtos
+route.post("/register/product", checkToken, isProducer, registerProduct);
+
+//Rotas de adição de endereço, carrinho e produtos favoritos
 route.post("/add/address", checkToken, addUserAddress) 
 route.post("/add/shoppingCart", checkToken, addShoppingCart)
 route.post("/add/likedProducts", checkToken, addLikedProducts)
 
+//Rota de finalização de compra
 route.post("/sales/payment", checkToken, sale)
 
-route.post("/auth/login", login)
+
 
 /*
 
