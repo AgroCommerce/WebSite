@@ -1,6 +1,12 @@
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'PRODUCER', 'USER');
 
+-- CreateEnum
+CREATE TYPE "Status" AS ENUM ('PAYMENT_PENDING', 'PAYMENT_APPROVED', 'PAYMENT_REJECTED', 'SHIPPED', 'DELIVERED', 'CANCELED');
+
+-- CreateEnum
+CREATE TYPE "PaymentMethod" AS ENUM ('CREDIT_CARD', 'DEBIT_CARD', 'PIX', 'BOLETO');
+
 -- CreateTable
 CREATE TABLE "usuarios" (
     "id" TEXT NOT NULL,
@@ -18,7 +24,7 @@ CREATE TABLE "usuarios" (
 CREATE TABLE "produtos-curtidos" (
     "id" SERIAL NOT NULL,
     "usuario_id" TEXT NOT NULL,
-    "productId" INTEGER[],
+    "produto_id" INTEGER NOT NULL,
     "criado-em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "produtos-curtidos_pkey" PRIMARY KEY ("id")
@@ -28,7 +34,7 @@ CREATE TABLE "produtos-curtidos" (
 CREATE TABLE "carrinho-de-compras" (
     "id" SERIAL NOT NULL,
     "usuario_id" TEXT NOT NULL,
-    "productId" INTEGER[],
+    "produto_id" INTEGER NOT NULL,
     "criado-em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "carrinho-de-compras_pkey" PRIMARY KEY ("id")
@@ -97,9 +103,13 @@ CREATE TABLE "comentario-produtos" (
 
 -- CreateTable
 CREATE TABLE "vendas" (
-    "id" BIGSERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "productId" INTEGER NOT NULL,
+    "id" SERIAL NOT NULL,
+    "usuario_id" TEXT NOT NULL,
+    "produtos-id" INTEGER[],
+    "endereco-cliente-id" INTEGER NOT NULL,
+    "total" DECIMAL(65,30) NOT NULL,
+    "status-pedido" "Status" NOT NULL DEFAULT 'PAYMENT_PENDING',
+    "forma-pagamento" "PaymentMethod" NOT NULL,
     "vendido-em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "vendas_pkey" PRIMARY KEY ("id")
@@ -110,18 +120,6 @@ CREATE UNIQUE INDEX "usuarios_cpf_key" ON "usuarios"("cpf");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "usuarios_email_key" ON "usuarios"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "produtos-curtidos_usuario_id_key" ON "produtos-curtidos"("usuario_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "produtos-curtidos_productId_key" ON "produtos-curtidos"("productId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "carrinho-de-compras_usuario_id_key" ON "carrinho-de-compras"("usuario_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "carrinho-de-compras_productId_key" ON "carrinho-de-compras"("productId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "produtores_userId_key" ON "produtores"("userId");
@@ -136,7 +134,13 @@ CREATE UNIQUE INDEX "recriar-senha_email_key" ON "recriar-senha"("email");
 CREATE INDEX "recriar-senha_email_token_idx" ON "recriar-senha"("email", "token");
 
 -- AddForeignKey
+ALTER TABLE "produtos-curtidos" ADD CONSTRAINT "produtos-curtidos_produto_id_fkey" FOREIGN KEY ("produto_id") REFERENCES "produtos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "produtos-curtidos" ADD CONSTRAINT "produtos-curtidos_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "usuarios"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "carrinho-de-compras" ADD CONSTRAINT "carrinho-de-compras_produto_id_fkey" FOREIGN KEY ("produto_id") REFERENCES "produtos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "carrinho-de-compras" ADD CONSTRAINT "carrinho-de-compras_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "usuarios"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -157,4 +161,4 @@ ALTER TABLE "produtos" ADD CONSTRAINT "produtos_produtor_id_fkey" FOREIGN KEY ("
 ALTER TABLE "comentario-produtos" ADD CONSTRAINT "comentario-produtos_produto_id_fkey" FOREIGN KEY ("produto_id") REFERENCES "produtos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "vendas" ADD CONSTRAINT "vendas_userId_fkey" FOREIGN KEY ("userId") REFERENCES "usuarios"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "vendas" ADD CONSTRAINT "vendas_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "usuarios"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

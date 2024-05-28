@@ -4,7 +4,7 @@ const route = express.Router();
 import { addUserAddress, registerUser, registerProducer, addLikedProducts } from './controllers/UserController';
 import { registerProduct, addShoppingCart } from './controllers/ProductController';
 import { login } from './controllers/LoginController';
-import { sale } from './controllers/SalesController'; // Change the import statement to use default import syntax
+import { endSale } from './controllers/SalesController'; // Change the import statement to use default import syntax
 
 import { checkToken, isProducer } from './middlewares/AuthToken';
 
@@ -24,7 +24,7 @@ route.post("/add/shoppingCart", checkToken, addShoppingCart)
 route.post("/add/likedProducts", checkToken, addLikedProducts)
 
 //Rota de finalização de compra
-route.post("/sales/payment", checkToken, sale)
+route.post("/sales/payment/end", checkToken, endSale)
 
 
 
