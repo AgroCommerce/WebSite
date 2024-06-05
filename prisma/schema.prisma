@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  // provider = "prisma-dbml-generator"
 }
 
 datasource db {
@@ -23,12 +24,11 @@ model User {
   roles     Role     @default(USER) @map("cargo") // change to enum on mysql
   createdAt DateTime @default(now())
 
-  producer         Producer?
-  shoppingCart     ShoppingCart[]
-  likedProducts    LikedProducts[]
-  userAddress      UserAddress[]
-  recreatePassword RecreatePassword[]
-  sales            Sales[]
+  producer      Producer?
+  shoppingCart  ShoppingCart[]
+  likedProducts LikedProducts[]
+  userAddress   UserAddress[]
+  sales         Sales[]
 
   @@map("usuarios")
 }
@@ -100,19 +100,6 @@ model Producer {
   @@map("produtores")
 }
 
-model RecreatePassword {
-  email           String   @unique
-  token           String
-  createdAt       DateTime @default(now()) @map("criado-em")
-  newPasswordUser String   @map("nova-senha-usuario")
-  userId          String   @map("usuario_id")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([email, token])
-  @@map("recriar-senha")
-}
-
 model Product {
   id          Int      @id @default(autoincrement())
   description String   @map("descricao")
@@ -123,42 +110,40 @@ model Product {
   createdAt   DateTime @default(now()) @map("criado-em")
   producerId  String   @map("produtor_id")
 
-  productReviews ProductReviews[]
-  LikedProducts  LikedProducts[]
-  shoppingCart   ShoppingCart[]
+  sales         ProductForSale[]
+  LikedProducts LikedProducts[]
+  shoppingCart  ShoppingCart[]
 
   producer Producer @relation(fields: [producerId], references: [id])
 
   @@map("produtos")
 }
 
-model ProductReviews {
-  id            Int      @id @default(autoincrement())
-  title         String   @map("titulo")
-  description   String   @map("descricao")
-  numberReviews Int      @map("numero-avaliacoes")
-  productId     Int      @map("produto_id")
-  createdAt     DateTime @default(now()) @map("criado-em")
-
-  product Product @relation(fields: [productId], references: [id])
-
-  @@map("comentario-produtos")
-}
-
 model Sales {
-  id         Int    @id @default(autoincrement())
-  userId     String @map("usuario_id")
-  productsId Int[]  @map("produtos-id")
-
-  userAddressId Int           @map("endereco-cliente-id")
-  total         Decimal       @map("total")
-  status        Status        @default(PAYMENT_PENDING) @map("status-pedido")
-  paymentMethod PaymentMethod @map("forma-pagamento")
-  soldIn        DateTime      @default(now()) @map("vendido-em")
+  id            Int              @id @default(autoincrement())
+  userId        String           @map("usuario_id")
+  userAddressId Int              @map("endereco-cliente-id")
+  products      ProductForSale[]
+  total         Decimal          @map("total")
+  status        Status           @default(PAYMENT_PENDING) @map("status-pedido")
+  paymentMethod PaymentMethod    @map("forma-pagamento")
+  soldIn        DateTime         @default(now()) @map("vendido-em")
 
   user User @relation(fields: [userId], references: [id])
 
   @@map("vendas")
+}
+
+model ProductForSale {
+  id        Int    @id @default(autoincrement())
+  productId Int    @map("produto_id")
+  salesId   Int?   @map("venda_id")
+  quantity  BigInt @map("quantidade")
+
+  Sales   Sales?  @relation(fields: [salesId], references: [id])
+  Product Product @relation(fields: [productId], references: [id])
+
+  @@map("produtos-venda")
 }
 
 enum Role {

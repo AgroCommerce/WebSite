@@ -43,6 +43,7 @@ export async function registerProduct(req: Request, res: Response) {
 export async function addShoppingCart(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const productId: Product['id'] = req.body.productId
+    const quantity:number = req.body.quantity
 
     if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
     if(!userId) return res.status(401).json({ messageError: 'You must' })
@@ -79,7 +80,7 @@ export async function addShoppingCart(req: Request, res: Response) {
             await prisma.shoppingCart.create({
                 data: {
                     userId: user.id,
-                    productId: product.id
+                    productId: product.id,
                 }
             })
         } else {

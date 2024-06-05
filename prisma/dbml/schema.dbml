@@ -1,0 +1,137 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table usuarios {
+  id String [pk]
+  name String [not null]
+  cpf BigInt [unique, not null]
+  email String [unique, not null]
+  password String [not null]
+  roles Role [not null, default: 'USER']
+  createdAt DateTime [default: `now()`, not null]
+  producer produtores
+  shoppingCart carrinho-de-compras [not null]
+  likedProducts produtos-curtidos [not null]
+  userAddress endereco-usuario [not null]
+  sales vendas [not null]
+}
+
+Table produtos-curtidos {
+  id Int [pk, increment]
+  userId String [not null]
+  productId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  product produtos [not null]
+  user usuarios [not null]
+}
+
+Table carrinho-de-compras {
+  id Int [pk, increment]
+  userId String [not null]
+  productId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  product produtos [not null]
+  user usuarios [not null]
+}
+
+Table endereco-usuario {
+  id Int [pk, increment]
+  userId String [not null]
+  address String [not null]
+  numberAddress Int [not null]
+  district String [not null]
+  city String [not null]
+  estate String [not null]
+  country String [not null]
+  cep BigInt [not null]
+  user usuarios [not null]
+}
+
+Table produtores {
+  id String [pk]
+  userId String [unique, not null]
+  companyName String [not null]
+  cnpj BigInt [unique, not null]
+  telephone BigInt [not null]
+  user usuarios [not null]
+  Product produtos [not null]
+}
+
+Table produtos {
+  id Int [pk, increment]
+  description String [not null]
+  title String [not null]
+  price Decimal [not null]
+  quantity BigInt [not null]
+  keyWords String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  producerId String [not null]
+  sales produtos-venda [not null]
+  LikedProducts produtos-curtidos [not null]
+  shoppingCart carrinho-de-compras [not null]
+  producer produtores [not null]
+}
+
+Table vendas {
+  id Int [pk, increment]
+  userId String [not null]
+  userAddressId Int [not null]
+  products produtos-venda [not null]
+  total Decimal [not null]
+  status Status [not null, default: 'PAYMENT_PENDING']
+  paymentMethod PaymentMethod [not null]
+  soldIn DateTime [default: `now()`, not null]
+  user usuarios [not null]
+}
+
+Table produtos-venda {
+  id Int [pk, increment]
+  productId Int [not null]
+  salesId Int [not null]
+  quantity BigInt [not null]
+  Sales vendas [not null]
+  Product produtos [not null]
+}
+
+Enum Role {
+  ADMIN
+  PRODUCER
+  USER
+}
+
+Enum Status {
+  PAYMENT_PENDING
+  PAYMENT_APPROVED
+  PAYMENT_REJECTED
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+Enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PIX
+  BOLETO
+}
+
+Ref: produtos-curtidos.productId > produtos.id
+
+Ref: produtos-curtidos.userId > usuarios.id
+
+Ref: carrinho-de-compras.productId > produtos.id
+
+Ref: carrinho-de-compras.userId > usuarios.id
+
+Ref: endereco-usuario.userId > usuarios.id [delete: Cascade]
+
+Ref: produtores.userId - usuarios.id
+
+Ref: produtos.producerId > produtores.id
+
+Ref: vendas.userId > usuarios.id
+
+Ref: produtos-venda.salesId > vendas.id
+
+Ref: produtos-venda.productId > produtos.id
