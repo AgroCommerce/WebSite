@@ -140,8 +140,8 @@ model ProductForSale {
   salesId   Int?   @map("venda_id")
   quantity  BigInt @map("quantidade")
 
-  Sales   Sales?  @relation(fields: [salesId], references: [id])
-  Product Product @relation(fields: [productId], references: [id])
+  sales   Sales?  @relation(fields: [salesId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 
   @@map("produtos-venda")
 }
