@@ -8,10 +8,12 @@ export async function endSale(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const paymentMethod = req.body.paymentMethod
     const userAddressId: number = req.body.userAddressId
-    const quantity: number = req.body.quantity
+    const quantity: Array<number> = req.body.quantity
 
-    if (!paymentMethod || !userAddressId) return res.status(400).json({ error: 'Invalid body! ' })
+    if (!paymentMethod || !userAddressId || !quantity) return res.status(400).json({ error: 'Invalid body! ' })
     if (!userId) return res.status(401).json({ error: 'You must be logged in to complete a sale' })
+    if (quantity.length === 0) return res.status(400).json({ error: 'Quantity is empty' })
+
 
     try {
         const [data, user] = await Promise.all([
@@ -32,65 +34,53 @@ export async function endSale(req: Request, res: Response) {
                 }
             }),
         ])
+        if (!user) return res.status(404).json({ error: 'User not found' })
+
+        const addressId = user.userAddress.find((address) => {
+            return address.id === userAddressId
+        })
+        if (!addressId) return res.status(404).json({ error: 'Address not found' })
 
         const products = data.map((product) => {
             return product.product
         })
 
         if (products.length === 0) return res.status(400).json({ error: 'Shopping cart is empty' })
+        if (quantity.length !== products.length) return res.status(400).json({ error: 'Quantity is invalid' })
 
-        const productsId = products.map((product) => {
-            return product.id
-        })
+        const total: Array<number> = []
+        let totalValue: number = 0
 
-        const total: any = products.map((product) => {
-            return Number(product.price) // Convert Decimal to number
-        })
-
-        const totalValue = total.reduce((total: number, value: number) => {
-            return total + value
-        })
-
-        if (!user) return res.status(404).json({ error: 'User not found' })
-
-        const addressId = user.userAddress.find((address) => {
-            return address.id === userAddressId
-        })
-
-        if (!addressId) return res.status(404).json({ error: 'Address not found' })
-
-
-        const teste = await prisma.sales.create({
-            data: {
-                userId,
-                paymentMethod,
-                userAddressId: addressId.id,
-                total: totalValue as Decimal,
-                products: {
-                    connect: productsId.map((id) => {
-                        return { id }
-                    })
-                }
+        for (let i = 0; i < quantity.length; i++) {
+            if (quantity[i] > products[i].quantity) {
+                return res.status(400).json({ error: 'Quantity is invalid' })
             }
-        })
+            total.push(Number(products[i].price) * quantity[i])
+            totalValue += total[i]
+        }
+
         await prisma.sales.create({
             data: {
                 userId,
                 paymentMethod,
-                userAddressId: addressId.id,
-                total: totalValue as Decimal,
+                userAddressId,
+                total: totalValue,
                 products: {
-                    create: [
-                        {
-                            Product: { connect: { id: productsId[0] } },
-                            quantity: quantity
+                    create: products.map((product, index) => {
+                        return {
+                            Product: { connect: { id: product.id } },
+                            quantity: quantity[index]
                         }
-                    ]
+                    })
                 }
             },
         })
 
-        console.log(teste)
+        await prisma.shoppingCart.deleteMany({
+            where: {
+                userId
+            }
+        })
 
         return res.status(200).json({ message: 'Sale completed successfully' })
     } catch (error) {
