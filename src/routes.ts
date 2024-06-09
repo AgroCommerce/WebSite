@@ -23,6 +23,7 @@ route.get("/get/:producerId/products/", getProductsByProducer);
 route.get("/get/product/:productId", getProductById);
 
 route.get("/get/shoppingCart", checkToken, getShoppingCart);
+route.post("/remove/shoppingCart", checkToken, removeShoppingCart);
 
 //Rotas de adição de endereço, carrinho e produtos favoritos
 route.post("/add/address", checkToken, addUserAddress) 
