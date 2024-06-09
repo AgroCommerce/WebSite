@@ -33,20 +33,6 @@ model User {
   @@map("usuarios")
 }
 
-// model InteractionUser {
-//   id           Int      @id @default(autoincrement())
-//   liked        Boolean  @default(false) @map("curtido")
-//   shoppingCart Boolean  @default(false) @map("carrinho-de-compras")
-//   createdAt    DateTime @default(now()) @map("criado-em")
-//   userId       String   @map("usuario_id")
-//   productId    Int?     @map("produto_id")
-
-//   product Product? @relation(fields: [productId], references: [id])
-//   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   @@map("interacao-usuario")
-// }
-
 model LikedProducts {
   id        Int      @id @default(autoincrement())
   userId    String   @map("usuario_id")
@@ -105,7 +91,7 @@ model Product {
   description String   @map("descricao")
   title       String   @map("titulo")
   price       Decimal  @map("preco")
-  quantity    BigInt   @map("quantidade")
+  quantity    Int   @map("quantidade")
   keyWords    String   @map("palavras-chaves")
   createdAt   DateTime @default(now()) @map("criado-em")
   producerId  String   @map("produtor_id")

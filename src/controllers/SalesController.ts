@@ -57,6 +57,15 @@ export async function endSale(req: Request, res: Response) {
             }
             total.push(Number(products[i].price) * quantity[i])
             totalValue += total[i]
+            
+            await prisma.product.update({
+                where: {
+                    id: products[i].id
+                },
+                data: {
+                    quantity: products[i].quantity - quantity[i]
+                }
+            })
         }
 
         await prisma.sales.create({
@@ -68,7 +77,7 @@ export async function endSale(req: Request, res: Response) {
                 products: {
                     create: products.map((product, index) => {
                         return {
-                            Product: { connect: { id: product.id } },
+                            product: { connect: { id: product.id } }, 
                             quantity: quantity[index]
                         }
                     })
