@@ -41,6 +41,38 @@ export async function registerProduct(req: Request, res: Response) {
     }
 }
 
+export async function updateStock(req: Request, res: Response) {
+    const productId: Product['id'] = req.body.productId
+    const quantity: number = req.body.quantity
+    const producerId = getProducerId(req.headers)
+
+    if(!producerId) return res.status(401).json({ messageError: 'You must be logged in to update a product' })
+    if (!productId || !quantity) return res.status(400).json({ error: 'Invalid body' })
+
+    try {
+        const product = await prisma.product.findUnique({
+            where: {
+                id: productId
+            }
+        })
+
+        if (!product) return res.status(404).json({ error: 'Product not found' })
+
+        await prisma.product.update({
+            where: {
+                id: productId
+            },
+            data: {
+                quantity: product.quantity + quantity
+            }
+        })
+
+        return res.status(200).json({ message: 'Stock updated successfully' })
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' })
+    }
+}
+
 export async function addShoppingCart(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const productId: Product['id'] = req.body.productId

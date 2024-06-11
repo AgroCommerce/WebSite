@@ -14,7 +14,6 @@ export async function endSale(req: Request, res: Response) {
     if (!userId) return res.status(401).json({ error: 'You must be logged in to complete a sale' })
     if (quantity.length === 0) return res.status(400).json({ error: 'Quantity is empty' })
 
-
     try {
         const [data, user] = await Promise.all([
             prisma.shoppingCart.findMany({
