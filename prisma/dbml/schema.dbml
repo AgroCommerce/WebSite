@@ -63,7 +63,7 @@ Table produtos {
   description String [not null]
   title String [not null]
   price Decimal [not null]
-  quantity BigInt [not null]
+  quantity Int [not null]
   keyWords String [not null]
   createdAt DateTime [default: `now()`, not null]
   producerId String [not null]
@@ -88,10 +88,10 @@ Table vendas {
 Table produtos-venda {
   id Int [pk, increment]
   productId Int [not null]
-  salesId Int [not null]
+  salesId Int
   quantity BigInt [not null]
-  Sales vendas [not null]
-  Product produtos [not null]
+  sales vendas
+  product produtos [not null]
 }
 
 Enum Role {

@@ -18,9 +18,6 @@ export const checkToken = (req: Request, res: Response, next: NextFunction) => {
     try {
         const secret = process.env.SECRET as Secret
         jwt.verify(token, secret)
-        //const decodedToken = jwt.decode(token, {complete: true, json: true})
-        //const payload  = decodedToken?.payload as JwtPayload
-        //if(payload.roles !== 'PRODUCER') return res.status(401).json({ messageError: 'Unauthorized, you must to be a PRODUCER' })
         next()
 
     } catch (error) {

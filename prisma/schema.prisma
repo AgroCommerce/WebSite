@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  // provider = "prisma-dbml-generator"
+  //provider = "prisma-dbml-generator"
 }
 
 datasource db {
