@@ -1,7 +1,7 @@
 import express from 'express';
 const route = express.Router();
 
-import { addUserAddress, registerUser, registerProducer, addLikedProducts } from './controllers/UserController';
+import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById } from './controllers/UserController';
 import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, updateStock } from './controllers/ProductController';
 import { login } from './controllers/LoginController';
 import { endSale } from './controllers/SalesController'; // Change the import statement to use default import syntax
@@ -15,6 +15,7 @@ route.post("/auth/login", login)
 //Rota de registro de produtores
 
 route.post("/register/producer", checkToken ,registerProducer);
+route.get("/get/user", getUserById)
 
 //Rota de registro de produtos
 route.post("/register/product", checkToken, isProducer, registerProduct);

@@ -33,8 +33,8 @@ export async function login(req: Request, res: Response) {
         const secret = process.env.SECRET as jwt.Secret
         const token = jwt.sign({ id: user.id, roles: user.roles, producerId: user.producer?.id  }, secret)
 
-        res.cookie("authLogin", token, {
-            maxAge: 60 * 60 * 24 * 7,
+        res.cookie("a54", token, {
+            maxAge: 1209600000,
             httpOnly: true,
             secure: process.env.NODE_ENV !== 'development',
             path: '/',
