@@ -7,30 +7,35 @@ import { getProducerId, getUserId } from '../utils/getHeaderData'
 //add update stock
 export async function registerProduct(req: Request, res: Response) {
     const { description, title, price, quantity, keyWords } = req.body as Product
-    const producerId = getProducerId(req.headers)
-    const apartWords = keyWords.split(',')
+    const userId = getUserId(req.headers)
 
-    if(!producerId) return res.status(401).json({ messageError: 'You must be logged in to register a product' })
+    const apartWords = keyWords.split(',')
+    if(!userId) return res.status(401).json({ messageError: 'You must be logged in to register a product' })
 
     if (!description || !title || !price || !quantity || !keyWords) return res.status(400).json({ error: 'All fields must be filled' })
     if (apartWords.length > 5 || apartWords.length < 3) return res.status(400).json({ error: 'KeyWords must have a maximum of 5 words and a minimum of 3' })
 
     try {
-        const producer = await prisma.producer.findUnique({
+        const user = await prisma.user.findUnique({
             where: {
-                id: producerId
+                id: userId
+            },
+            include: {
+                producer: true
             }
         })
-
-        if (!producer) return res.status(404).json({ error: 'Producer not found' })
+        
+        const producerId = user?.producer?.id
+        if (!producerId) return res.status(404).json({ error: 'Producer not found' })
 
         await prisma.product.create({
             data: {
                 description,
                 title,
                 price,
-                quantity,
+                quantity, 
                 keyWords,
+                imgUrl: 'teste',
                 producerId,
             }
         })

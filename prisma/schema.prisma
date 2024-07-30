@@ -18,10 +18,13 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   name      String   @map("nome")
-  cpf       BigInt   @unique
+  cpf       String   @unique
   email     String   @unique
   password  String   @map("senha")
-  roles     Role     @default(USER) @map("cargo") // change to enum on mysql
+  role      Role     @default(USER) @map("cargo") // change to enum on mysql
+  cellphone BigInt?  @map("celular")
+  birthDate DateTime @map("data-nascimento")
+  gender    String?  @map("genero")
   createdAt DateTime @default(now())
 
   producer      Producer?
@@ -91,8 +94,9 @@ model Product {
   description String   @map("descricao")
   title       String   @map("titulo")
   price       Decimal  @map("preco")
-  quantity    Int   @map("quantidade")
+  quantity    Int      @map("quantidade")
   keyWords    String   @map("palavras-chaves")
+  imgUrl      String   @map("url-imagem")
   createdAt   DateTime @default(now()) @map("criado-em")
   producerId  String   @map("produtor_id")
 

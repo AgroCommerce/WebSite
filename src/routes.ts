@@ -1,10 +1,10 @@
 import express from 'express';
 const route = express.Router();
 
-import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById } from './controllers/UserController';
+import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser } from './controllers/UserController';
 import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, updateStock } from './controllers/ProductController';
 import { login } from './controllers/LoginController';
-import { endSale } from './controllers/SalesController'; // Change the import statement to use default import syntax
+import { endSale, getSalesUser } from './controllers/SalesController'; // Change the import statement to use default import syntax
 
 import { checkToken, isProducer } from './middlewares/AuthToken';
 
@@ -16,14 +16,16 @@ route.post("/auth/login", login)
 
 route.post("/register/producer", checkToken ,registerProducer);
 route.get("/get/user", getUserById)
+route.put("/update/user", checkToken, updateUser)
 
 //Rota de registro de produtos
-route.post("/register/product", checkToken, isProducer, registerProduct);
+route.post("/register/product", checkToken, registerProduct);
 route.put("/update/product", checkToken, isProducer, updateStock);
 
 route.get("/get/products", getProducts);
 route.get("/get/:producerId/products/", getProductsByProducer);
 route.get("/get/product/:productId", getProductById);
+route.get("/get/user/sales", checkToken, getSalesUser)
 
 route.get("/get/shoppingCart", checkToken, getShoppingCart);
 route.post("/remove/shoppingCart", checkToken, removeShoppingCart);

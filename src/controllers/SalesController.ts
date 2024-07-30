@@ -96,3 +96,35 @@ export async function endSale(req: Request, res: Response) {
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
+
+export async function getSalesUser(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    if (!userId) return res.status(401).json({ error: 'You must be logged in to see your sales' })
+
+    try {
+        const data = await prisma.sales.findMany({
+            where: {
+                userId
+            },
+            include: {
+                products: {
+                    include: {
+                        product: true
+                    }
+                }
+            }
+        })
+        const dataJson = JSON.stringify(data, toObject);
+        console.log(data)
+        return res.status(200).json(JSON.parse(dataJson))
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ error: 'Internal Server Error' })
+    }
+}
+
+export function toObject(key: string, value: any) {
+    return typeof value === 'bigint'
+        ? value.toString()
+        : value; // return everything else unchanged
+}

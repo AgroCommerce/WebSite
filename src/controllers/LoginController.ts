@@ -13,7 +13,7 @@ import jwt from 'jsonwebtoken';
 
 export async function login(req: Request, res: Response) {
     const { email, password } = req.body
-
+    1!
     try {
         let user = await prisma.user.findUnique({
             where: {
@@ -31,7 +31,7 @@ export async function login(req: Request, res: Response) {
         if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
 
         const secret = process.env.SECRET as jwt.Secret
-        const token = jwt.sign({ id: user.id, roles: user.roles, producerId: user.producer?.id  }, secret)
+        const token = jwt.sign({ id: user.id, role: user.role, producerId: user.producer?.id  }, secret)
 
         res.cookie("a54", token, {
             maxAge: 1209600000,
