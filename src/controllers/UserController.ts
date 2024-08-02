@@ -227,13 +227,13 @@ export async function updateUser(req: Request, res: Response) {
         const OldName = user.name
         const OldCellphone = user.cellphone
         const OldGender = user.gender
-
+        console.log(cellphone?.toString().replace(/\D/g, ''))
         await prisma.user.update({
             where: {
                 id: userId
             },
             data: {
-                cellphone: cellphone ? cellphone : OldCellphone,
+                cellphone: cellphone ? Number(cellphone.toString().replace(/\D/g, '')) : OldCellphone,
                 name: name ? name : OldName,
                 gender: gender ? gender : OldGender,
             }
