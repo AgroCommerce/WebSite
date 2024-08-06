@@ -62,12 +62,14 @@ model ShoppingCart {
 
 model UserAddress {
   id            Int    @id @default(autoincrement())
+  receiverName  String @map("nome-destinatario")
   userId        String @map("usuario_id")
   address       String @map("endereco")
+  typeAddress   String @map("tipo-endereco")
   numberAddress Int    @map("numero")
   district      String @map("bairro")
   city          String @map("cidade")
-  estate        String @map("estado")
+  state         String @map("estado")
   country       String @map("pais")
   cep           BigInt @map("cep")
 

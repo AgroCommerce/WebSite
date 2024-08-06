@@ -97,9 +97,12 @@ export async function registerProducer(req: Request, res: Response) {
 }
 
 export async function addUserAddress(req: Request, res: Response) {
-    const { cep, address, city, country, district, estate, numberAddress } = req.body as UserAddress
+    const { cep, address, city, country, district, state, numberAddress, receiverName, typeAddress } = req.body as UserAddress
     const userId = getUserId(req.headers)
 
+    if(!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+    if(!cep || !address || !city || !country || !district || !state || !numberAddress || !receiverName || !typeAddress) return res.status(400).json({ messageError: 'Invalid body' })
+        
     const user = await prisma.user.findUnique({
         where: {
             id: userId
@@ -116,8 +119,10 @@ export async function addUserAddress(req: Request, res: Response) {
                 city,
                 country,
                 district,
-                estate,
+                state,
                 numberAddress,
+                receiverName,
+                typeAddress,
                 user: {
                     connect: {
                         id: user.id
@@ -128,6 +133,7 @@ export async function addUserAddress(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'Address added successfully' })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
