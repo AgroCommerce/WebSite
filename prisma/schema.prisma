@@ -24,7 +24,7 @@ model User {
   role      Role     @default(USER) @map("cargo") // change to enum on mysql
   cellphone BigInt?  @map("celular")
   birthDate DateTime @map("data-nascimento")
-  gender    String?  @map("genero")
+  gender    Genders?  @map("genero")
   createdAt DateTime @default(now())
 
   producer      Producer?
@@ -158,4 +158,11 @@ enum PaymentMethod {
   DEBIT_CARD
   PIX
   BOLETO
+}
+
+enum Genders {
+  MASC
+  FEM
+  OTHER
+  NOTTOSAY
 }

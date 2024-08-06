@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs'
 // post
 export async function registerUser(req: Request, res: Response) {
     const { name, email, cpf, password, birthDate } = req.body as User
-
+    console.log(name, email, cpf, password, birthDate)
     if (!name || !email || !cpf || !password || !birthDate) return res.status(400).json({ messageError: 'Invalid body' })
     if (password.length < 6) return res.status(400).json({ messageError: 'Password must have at least 6 characters' })
     if (!CpfCnpjUtils.isCpfValid(cpf)) return res.status(401).json({ messageError: 'Invalid CPF' }) //deu erro de string aqui
@@ -233,13 +233,13 @@ export async function updateUser(req: Request, res: Response) {
         const OldName = user.name
         const OldCellphone = user.cellphone
         const OldGender = user.gender
-
+        console.log(cellphone?.toString().replace(/\D/g, ''))
         await prisma.user.update({
             where: {
                 id: userId
             },
             data: {
-                cellphone: cellphone ? cellphone : OldCellphone,
+                cellphone: cellphone ? Number(cellphone.toString().replace(/\D/g, '')) : OldCellphone,
                 name: name ? name : OldName,
                 gender: gender ? gender : OldGender,
             }
