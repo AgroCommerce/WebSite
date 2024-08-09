@@ -219,7 +219,7 @@ export function toObject(key: string, value: any) {
 
 export async function updateUser(req: Request, res: Response) {
     const userId = getUserId(req.headers)
-    const { cellphone, gender, name } = req.body as User
+    const { cellphone, gender, name, email } = req.body as User
 
     if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
 
@@ -233,7 +233,8 @@ export async function updateUser(req: Request, res: Response) {
         const OldName = user.name
         const OldCellphone = user.cellphone
         const OldGender = user.gender
-        console.log(cellphone?.toString().replace(/\D/g, ''))
+        const oldEmail = user.email
+
         await prisma.user.update({
             where: {
                 id: userId
@@ -242,6 +243,7 @@ export async function updateUser(req: Request, res: Response) {
                 cellphone: cellphone ? Number(cellphone.toString().replace(/\D/g, '')) : OldCellphone,
                 name: name ? name : OldName,
                 gender: gender ? gender : OldGender,
+                email: email ? email : oldEmail
             }
         })
 
