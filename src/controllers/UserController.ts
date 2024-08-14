@@ -217,6 +217,7 @@ export function toObject(key: string, value: any) {
         : value; // return everything else unchanged
 }
 
+//colocar para alterar email somente com senha
 export async function updateUser(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const { cellphone, gender, name, email } = req.body as User
@@ -251,5 +252,34 @@ export async function updateUser(req: Request, res: Response) {
     } catch (err) {
         console.log(err)
         return res.status(500).json({ messageError: 'iInternal Server Error' })
+    }
+}
+
+export async function deleteAddressById(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    const addressId = Number(req.params.addressId)
+
+    if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+    if (!addressId) return res.status(400).json({ messageError: 'Invalid params' })
+
+    try {
+        const address = await prisma.userAddress.findUnique({
+            where: {
+                id: addressId
+            }
+        })
+
+        if (!address) return res.status(404).json({ messageError: 'Address not found' })
+
+        await prisma.userAddress.delete({
+            where: {
+                id: addressId
+            }
+        })
+
+        return res.status(200).json({ message: 'Address deleted successfully' })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }

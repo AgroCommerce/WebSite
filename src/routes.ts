@@ -1,7 +1,7 @@
 import express from 'express';
 const route = express.Router();
 
-import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser } from './controllers/UserController';
+import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById } from './controllers/UserController';
 import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, updateStock } from './controllers/ProductController';
 import { login } from './controllers/LoginController';
 import { endSale, getSalesUser } from './controllers/SalesController'; // Change the import statement to use default import syntax
@@ -28,10 +28,11 @@ route.get("/get/product/:productId", getProductById);
 route.get("/get/user/sales", checkToken, getSalesUser)
 
 route.get("/get/shoppingCart", checkToken, getShoppingCart);
-route.post("/remove/shoppingCart", checkToken, removeShoppingCart);
+route.delete("/remove/shoppingCart", checkToken, removeShoppingCart);
 
 //Rotas de adição de endereço, carrinho e produtos favoritos
-route.post("/add/address", checkToken, addUserAddress) 
+route.post("/add/address/", checkToken, addUserAddress) 
+route.delete("/remove/address/:addressId", checkToken, deleteAddressById)
 route.post("/add/shoppingCart", checkToken, addShoppingCart)
 route.post("/add/likedProducts", checkToken, addLikedProducts)
 
