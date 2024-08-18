@@ -213,6 +213,7 @@ export function toObject(key: string, value: any) {
 export async function updateUser(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const { cellphone, gender, name, email, password } = req.body as User
+    console.log(req.body)
     if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
 
     try {
@@ -224,6 +225,7 @@ export async function updateUser(req: Request, res: Response) {
         if (!user) return res.status(404).json({ messageError: 'User not found' })
         
         if(email) {
+            if(!password) return res.status(400).json({ messageError: 'Invalid body' })
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
         }
@@ -247,6 +249,7 @@ export async function updateUser(req: Request, res: Response) {
 
         return res.status(200).json({ message: 'User updated successfully' })
     } catch (err) {
+        console.log(err)
         return res.status(500).json({ messageError: 'iInternal Server Error' })
     }
 }
@@ -274,6 +277,48 @@ export async function deleteAddressById(req: Request, res: Response) {
         })
 
         return res.status(200).json({ message: 'Address deleted successfully' })
+    } catch (error) {
+        return res.status(500).json({ messageError: 'Internal Server Error' })
+    }
+}
+
+export async function updateUserAddress(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    const addressId = req.params.addressId.split('-').map(Number)[0]
+    const { cep, address, city, country, district, state, numberAddress, receiverName, typeAddress } = req.body as UserAddress
+
+    if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+    if (!addressId) return res.status(400).json({ messageError: 'Invalid params' })
+    if (!cep || !address || !city || !country || !district || !state || !numberAddress || !receiverName || !typeAddress) return res.status(400).json({ messageError: 'Invalid body' })
+
+    try {
+        const address = await prisma.userAddress.findUnique({
+            where: {
+                id: addressId,
+                userId
+            }
+        })
+
+        if (!address) return res.status(404).json({ messageError: 'Address not found' })
+
+        await prisma.userAddress.update({
+            where: {
+                id: addressId,
+                userId
+            },
+            data: {
+                cep,
+                city,
+                country,
+                district,
+                state,
+                numberAddress,
+                receiverName,
+                typeAddress
+            }
+        })
+
+        return res.status(200).json({ message: 'Address updated successfully' })
     } catch (error) {
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
