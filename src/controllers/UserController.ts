@@ -9,7 +9,6 @@ import bcrypt from 'bcryptjs'
 // post
 export async function registerUser(req: Request, res: Response) {
     const { name, email, cpf, password, birthDate } = req.body as User
-    console.log(name, email, cpf, password, birthDate)
     if (!name || !email || !cpf || !password || !birthDate) return res.status(400).json({ messageError: 'Invalid body' })
     if (password.length < 6) return res.status(400).json({ messageError: 'Password must have at least 6 characters' })
     if (!CpfCnpjUtils.isCpfValid(cpf)) return res.status(401).json({ messageError: 'Invalid CPF' }) //deu erro de string aqui
@@ -42,7 +41,6 @@ export async function registerUser(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'User created successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
@@ -91,7 +89,6 @@ export async function registerProducer(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'Producer created successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
@@ -100,9 +97,9 @@ export async function addUserAddress(req: Request, res: Response) {
     const { cep, address, city, country, district, state, numberAddress, receiverName, typeAddress } = req.body as UserAddress
     const userId = getUserId(req.headers)
 
-    if(!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
-    if(!cep || !address || !city || !country || !district || !state || !numberAddress || !receiverName || !typeAddress) return res.status(400).json({ messageError: 'Invalid body' })
-        
+    if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+    if (!cep || !address || !city || !country || !district || !state || !numberAddress || !receiverName || !typeAddress) return res.status(400).json({ messageError: 'Invalid body' })
+
     const user = await prisma.user.findUnique({
         where: {
             id: userId
@@ -133,7 +130,6 @@ export async function addUserAddress(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'Address added successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
@@ -142,7 +138,6 @@ export async function addLikedProducts(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const productId: Product['id'] = req.body.productId
 
-    console.log(userId, productId)
     if (!productId) return res.status(400).json({ messageError: 'Invalid body' })
     if (!userId) return res.status(401).json({ messageError: 'You must' })
 
@@ -159,8 +154,6 @@ export async function addLikedProducts(req: Request, res: Response) {
                 }
             })
         ])
-
-        console.log(user, product)
 
         if (!product) return res.status(404).json({ error: 'Product not found' })
         if (!user) return res.status(404).json({ error: 'User not found' })
@@ -193,7 +186,6 @@ export async function addLikedProducts(req: Request, res: Response) {
 
 export async function getUserById(req: Request, res: Response) {
     const userId = getUserId(req.headers)
-    console.log(req.headers, userId)
     if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
 
     const user = await prisma.user.findUnique({
@@ -220,8 +212,7 @@ export function toObject(key: string, value: any) {
 //colocar para alterar email somente com senha
 export async function updateUser(req: Request, res: Response) {
     const userId = getUserId(req.headers)
-    const { cellphone, gender, name, email } = req.body as User
-
+    const { cellphone, gender, name, email, password } = req.body as User
     if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
 
     try {
@@ -231,6 +222,12 @@ export async function updateUser(req: Request, res: Response) {
             }
         })
         if (!user) return res.status(404).json({ messageError: 'User not found' })
+        
+        if(email) {
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
+        }
+       
         const OldName = user.name
         const OldCellphone = user.cellphone
         const OldGender = user.gender
@@ -250,7 +247,6 @@ export async function updateUser(req: Request, res: Response) {
 
         return res.status(200).json({ message: 'User updated successfully' })
     } catch (err) {
-        console.log(err)
         return res.status(500).json({ messageError: 'iInternal Server Error' })
     }
 }
@@ -279,7 +275,6 @@ export async function deleteAddressById(req: Request, res: Response) {
 
         return res.status(200).json({ message: 'Address deleted successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }

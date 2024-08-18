@@ -92,7 +92,6 @@ export async function endSale(req: Request, res: Response) {
 
         return res.status(200).json({ message: 'Sale completed successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
@@ -115,10 +114,8 @@ export async function getSalesUser(req: Request, res: Response) {
             }
         })
         const dataJson = JSON.stringify(data, toObject);
-        console.log(data)
         return res.status(200).json(JSON.parse(dataJson))
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }

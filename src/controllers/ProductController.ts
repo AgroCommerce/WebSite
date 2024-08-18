@@ -100,8 +100,6 @@ export async function addShoppingCart(req: Request, res: Response) {
             })
         ])
 
-        console.log(user, product)
-
         if (!product) return res.status(404).json({ error: 'Product not found' })
         if (!user) return res.status(404).json({ error: 'User not found' })
 
@@ -151,8 +149,6 @@ export async function removeShoppingCart(req: Request, res: Response) {
                 }
             })
         ])
-
-        console.log(user, product)
 
         if (!product) return res.status(404).json({ error: 'Product not found' })
         if (!user) return res.status(404).json({ error: 'User not found' })
