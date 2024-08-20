@@ -1,7 +1,7 @@
 import express from 'express';
 const route = express.Router();
 
-import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById } from './controllers/UserController';
+import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById, removeLikedProducts, getLikedProducts } from './controllers/UserController';
 import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, updateStock } from './controllers/ProductController';
 import { login } from './controllers/LoginController';
 import { endSale, getSalesUser } from './controllers/SalesController'; // Change the import statement to use default import syntax
@@ -35,6 +35,8 @@ route.post("/add/address/", checkToken, addUserAddress)
 route.delete("/remove/address/:addressId", checkToken, deleteAddressById)
 route.post("/add/shoppingCart", checkToken, addShoppingCart)
 route.post("/add/likedProducts", checkToken, addLikedProducts)
+route.delete("/remove/likedProducts", checkToken, removeLikedProducts) 
+route.get("/get/likedProducts", checkToken, getLikedProducts) 
 
 //Rota de finalização de compra
 route.post("/sales/payment/end", checkToken, endSale)
