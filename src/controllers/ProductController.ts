@@ -6,13 +6,13 @@ import { getProducerId, getUserId } from '../utils/getHeaderData'
 
 //add update stock
 export async function registerProduct(req: Request, res: Response) {
-    const { description, title, price, quantity, keyWords } = req.body as Product
+    const { description, title, price, quantity, keyWords, productCost } = req.body as Product
     const userId = getUserId(req.headers)
 
     const apartWords = keyWords.split(',')
     if(!userId) return res.status(401).json({ messageError: 'You must be logged in to register a product' })
 
-    if (!description || !title || !price || !quantity || !keyWords) return res.status(400).json({ error: 'All fields must be filled' })
+    if (!description || !title || !price || !quantity || !keyWords || !productCost) return res.status(400).json({ error: 'All fields must be filled' })
     if (apartWords.length > 5 || apartWords.length < 3) return res.status(400).json({ error: 'KeyWords must have a maximum of 5 words and a minimum of 3' })
 
     try {
@@ -37,6 +37,7 @@ export async function registerProduct(req: Request, res: Response) {
                 keyWords,
                 imgUrl: 'teste',
                 producerId,
+                productCost
             }
         })
 

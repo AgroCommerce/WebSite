@@ -97,6 +97,7 @@ model Product {
   title       String   @map("titulo")
   price       Decimal  @map("preco")
   quantity    Int      @map("quantidade")
+  productCost Decimal  @map("custo-produto")
   keyWords    String   @map("palavras-chaves")
   imgUrl      String   @map("url-imagem")
   createdAt   DateTime @default(now()) @map("criado-em")

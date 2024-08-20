@@ -184,6 +184,70 @@ export async function addLikedProducts(req: Request, res: Response) {
     }
 }
 
+export async function removeLikedProducts(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    const productId: Product['id'] = req.body.productId
+
+    if (!productId) return res.status(400).json({ messageError: 'Invalid body' })
+    if (!userId) return res.status(401).json({ messageError: 'You must' })
+
+    try {
+        const [product, user] = await Promise.all([
+            prisma.product.findUnique({
+                where: {
+                    id: productId
+                }
+            }),
+            prisma.user.findUnique({
+                where: {
+                    id: userId
+                }
+            })
+        ])
+
+        if (!product) return res.status(404).json({ error: 'Product not found' })
+        if (!user) return res.status(404).json({ error: 'User not found' })
+
+        const shoppingCart = await prisma.likedProducts.findFirst({
+            where: {
+                productId,
+                AND: {
+                    userId
+                }
+            }
+        })
+
+        if(!shoppingCart) return res.status(404).json({ error: 'Product not found in liked products' })
+
+        await prisma.likedProducts.delete({
+            where: {
+                id: shoppingCart.id
+            }
+        })
+        
+        return res.status(200).json({ message: 'Product removed from liked products' })
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' })
+    }
+}
+
+export async function getLikedProducts(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+
+    const likedProducts = await prisma.likedProducts.findMany({
+        where: {
+            userId
+        },
+        include: {
+            product: true
+        }
+    })
+
+    const likedProductsJson = JSON.stringify(likedProducts, toObject)
+    return res.status(200).json(JSON.parse(likedProductsJson))
+}
+
 export async function getUserById(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
