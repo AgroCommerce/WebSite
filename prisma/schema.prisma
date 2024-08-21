@@ -24,7 +24,7 @@ model User {
   role      Role     @default(USER) @map("cargo") // change to enum on mysql
   cellphone BigInt?  @map("celular")
   birthDate DateTime @map("data-nascimento")
-  gender    Genders?  @map("genero")
+  gender    Genders? @map("genero")
   createdAt DateTime @default(now())
 
   producer      Producer?
@@ -98,7 +98,7 @@ model Product {
   price       Decimal  @map("preco")
   quantity    Int      @map("quantidade")
   productCost Decimal  @map("custo-produto")
-  offer       Decimal?  @default(0.00) @map("oferta")
+  offer       Decimal? @default(0.00) @map("oferta")
   keyWords    String   @map("palavras-chaves")
   imgUrl      String   @map("url-imagem")
   createdAt   DateTime @default(now()) @map("criado-em")
