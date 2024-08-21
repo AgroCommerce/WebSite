@@ -6,7 +6,7 @@ import { getProducerId, getUserId } from '../utils/getHeaderData'
 
 //add update stock
 export async function registerProduct(req: Request, res: Response) {
-    const { description, title, price, quantity, keyWords, productCost } = req.body as Product
+    const { description, title, price, quantity, keyWords, productCost, offer } = req.body as Product
     const userId = getUserId(req.headers)
 
     const apartWords = keyWords.split(',')
@@ -37,7 +37,8 @@ export async function registerProduct(req: Request, res: Response) {
                 keyWords,
                 imgUrl: 'teste',
                 producerId,
-                productCost
+                productCost,
+                offer: offer ? offer : 0
             }
         })
 
