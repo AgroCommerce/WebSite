@@ -267,6 +267,22 @@ export async function getUserById(req: Request, res: Response) {
     return res.status(200).json(JSON.parse(userJson))
 }
 
+export async function getProducerById(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+
+    const producer = await prisma.producer.findUnique({
+        where: {
+            userId
+        }
+    })
+
+    if (!producer) return res.status(404).json({ error: 'Producer not found' })
+    
+    const producerJson = JSON.stringify(producer, toObject);
+    return res.status(200).json(JSON.parse(producerJson))
+}
+
 export function toObject(key: string, value: any) {
     return typeof value === 'bigint'
         ? value.toString()
