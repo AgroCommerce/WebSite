@@ -81,6 +81,8 @@ CREATE TABLE "produtos" (
     "titulo" TEXT NOT NULL,
     "preco" DECIMAL(65,30) NOT NULL,
     "quantidade" INTEGER NOT NULL,
+    "custo-produto" DECIMAL(65,30) NOT NULL,
+    "oferta" DECIMAL(65,30) DEFAULT 0.00,
     "palavras-chaves" TEXT NOT NULL,
     "url-imagem" TEXT NOT NULL,
     "criado-em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

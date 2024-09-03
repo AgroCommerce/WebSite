@@ -4,6 +4,8 @@ import { prisma } from "../lib/prisma"
 import { getUserId } from "../utils/getHeaderData"
 import { Decimal } from "@prisma/client/runtime/library"
 
+
+//fazer oferta na venda
 export async function endSale(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const paymentMethod = req.body.paymentMethod
