@@ -120,6 +120,34 @@ export async function getSalesUser(req: Request, res: Response) {
     }
 }
 
+export async function getSalesByProductId(req: Request, res: Response) {
+    const { productId } = req.params
+    if (!productId) return res.status(400).json({ error: 'Invalid params' })
+
+    try {
+        const data = await prisma.sales.findMany({
+            where: {
+                products: {
+                    some: {
+                        productId: Number(productId)
+                    }
+                }
+            },
+            include: {
+                products: {
+                    include: {
+                        product: true
+                    }
+                }
+            }
+        })
+        const dataJson = JSON.stringify(data, toObject);
+        return res.status(200).json(JSON.parse(dataJson))
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' })
+    }
+}
+
 export function toObject(key: string, value: any) {
     return typeof value === 'bigint'
         ? value.toString()

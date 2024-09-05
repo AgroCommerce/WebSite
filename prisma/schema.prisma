@@ -42,8 +42,8 @@ model LikedProducts {
   productId Int      @map("produto_id")
   createdAt DateTime @default(now()) @map("criado-em")
 
-  product Product @relation(fields: [productId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id],  onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id],  onDelete: Cascade)
 
   @@map("produtos-curtidos")
 }
@@ -54,8 +54,8 @@ model ShoppingCart {
   productId Int      @map("produto_id")
   createdAt DateTime @default(now()) @map("criado-em")
 
-  product Product @relation(fields: [productId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id],  onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id],  onDelete: Cascade)
 
   @@map("carrinho-de-compras")
 }
@@ -85,7 +85,7 @@ model Producer {
   cnpj        BigInt @unique
   telephone   BigInt @map("telefone")
 
-  user    User      @relation(fields: [userId], references: [id])
+  user    User      @relation(fields: [userId], references: [id],  onDelete: Cascade)
   Product Product[]
 
   @@map("produtores")
@@ -108,7 +108,7 @@ model Product {
   LikedProducts LikedProducts[]
   shoppingCart  ShoppingCart[]
 
-  producer Producer @relation(fields: [producerId], references: [id])
+  producer Producer @relation(fields: [producerId], references: [id],  onDelete: Cascade)
 
   @@map("produtos")
 }
@@ -123,7 +123,7 @@ model Sales {
   paymentMethod PaymentMethod    @map("forma-pagamento")
   soldIn        DateTime         @default(now()) @map("vendido-em")
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id],  onDelete: Cascade)
 
   @@map("vendas")
 }
@@ -134,8 +134,8 @@ model ProductForSale {
   salesId   Int?   @map("venda_id")
   quantity  BigInt @map("quantidade")
 
-  sales   Sales?  @relation(fields: [salesId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  sales   Sales?  @relation(fields: [salesId], references: [id],  onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id],  onDelete: Cascade)
 
   @@map("produtos-venda")
 }

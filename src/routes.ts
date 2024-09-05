@@ -2,9 +2,9 @@ import express from 'express';
 const route = express.Router();
 
 import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById, removeLikedProducts, getLikedProducts, getProducerById } from './controllers/UserController';
-import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, updateStock } from './controllers/ProductController';
+import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, updateStock, deleteProductById } from './controllers/ProductController';
 import { login } from './controllers/LoginController';
-import { endSale, getSalesUser } from './controllers/SalesController'; // Change the import statement to use default import syntax
+import { endSale, getSalesByProductId, getSalesUser } from './controllers/SalesController'; // Change the import statement to use default import syntax
 
 import { checkToken, isProducer } from './middlewares/AuthToken';
 
@@ -27,6 +27,7 @@ route.get("/get/products", getProducts);
 route.get("/get/producer", getProducerById);
 route.get("/get/:producerId/products/", getProductsByProducer);
 route.get("/get/product/:productId", getProductById);
+route.delete("/remove/product/:productId", checkToken, isProducer, deleteProductById);
 route.get("/get/user/sales", checkToken, getSalesUser)
 
 route.get("/get/shoppingCart", checkToken, getShoppingCart);
@@ -42,7 +43,7 @@ route.get("/get/likedProducts", checkToken, getLikedProducts)
 
 //Rota de finalização de compra
 route.post("/sales/payment/end", checkToken, endSale)
-
+route.get("/get/sales/:productId", checkToken, getSalesByProductId)
 
 
 /*

@@ -10,7 +10,7 @@ export async function registerProduct(req: Request, res: Response) {
     const userId = getUserId(req.headers)
 
     const apartWords = keyWords.split(',')
-    if(!userId) return res.status(401).json({ messageError: 'You must be logged in to register a product' })
+    if (!userId) return res.status(401).json({ messageError: 'You must be logged in to register a product' })
 
     if (!description || !title || !price || !quantity || !keyWords || !productCost) return res.status(400).json({ error: 'All fields must be filled' })
     if (apartWords.length > 5 || apartWords.length < 3) return res.status(400).json({ error: 'KeyWords must have a maximum of 5 words and a minimum of 3' })
@@ -24,7 +24,7 @@ export async function registerProduct(req: Request, res: Response) {
                 producer: true
             }
         })
-        
+
         const producerId = user?.producer?.id
         if (!producerId) return res.status(404).json({ error: 'Producer not found' })
 
@@ -33,7 +33,7 @@ export async function registerProduct(req: Request, res: Response) {
                 description,
                 title,
                 price,
-                quantity, 
+                quantity,
                 keyWords,
                 imgUrl: 'teste',
                 producerId,
@@ -53,7 +53,7 @@ export async function updateStock(req: Request, res: Response) {
     const quantity: number = req.body.quantity
     const producerId = getProducerId(req.headers)
 
-    if(!producerId) return res.status(401).json({ messageError: 'You must be logged in to update a product' })
+    if (!producerId) return res.status(401).json({ messageError: 'You must be logged in to update a product' })
     if (!productId || !quantity) return res.status(400).json({ error: 'Invalid body' })
 
     try {
@@ -83,10 +83,10 @@ export async function updateStock(req: Request, res: Response) {
 export async function addShoppingCart(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const productId: Product['id'] = req.body.productId
-    const quantity:number = req.body.quantity
+    const quantity: number = req.body.quantity
 
-    if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
-    if(!userId) return res.status(401).json({ messageError: 'You must' })
+    if (!productId) return res.status(400).json({ messageError: 'Invalid body' })
+    if (!userId) return res.status(401).json({ messageError: 'You must' })
 
     try {
         const [product, user] = await Promise.all([
@@ -135,8 +135,8 @@ export async function removeShoppingCart(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const productId: Product['id'] = req.body.productId
 
-    if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
-    if(!userId) return res.status(401).json({ messageError: 'You must' })
+    if (!productId) return res.status(400).json({ messageError: 'Invalid body' })
+    if (!userId) return res.status(401).json({ messageError: 'You must' })
 
     try {
         const [product, user] = await Promise.all([
@@ -183,7 +183,7 @@ export async function removeShoppingCart(req: Request, res: Response) {
 export async function getShoppingCart(req: Request, res: Response) {
     const userId = getUserId(req.headers)
 
-    if(!userId) return res.status(401).json({ messageError: 'You must be a logged' })
+    if (!userId) return res.status(401).json({ messageError: 'You must be a logged' })
 
     const shoppingCart = await prisma.shoppingCart.findMany({
         where: {
@@ -194,7 +194,7 @@ export async function getShoppingCart(req: Request, res: Response) {
         }
     })
 
-    if(shoppingCart.length === 0) return res.status(404).json({ messageError: 'Shopping cart is empty' })
+    if (shoppingCart.length === 0) return res.status(404).json({ messageError: 'Shopping cart is empty' })
     return res.status(200).json(shoppingCart)
 }
 
@@ -206,11 +206,11 @@ export async function getProducts(req: Request, res: Response) {
 export async function getProductById(req: Request, res: Response) {
     const { productId } = req.params
 
-    if(!productId) return res.status(400).json({ messageError: 'Invalid body' })
+    if (!productId) return res.status(400).json({ messageError: 'Invalid body' })
 
     const product = await prisma.product.findUnique({
         where: {
-            id: Number(productId) 
+            id: Number(productId)
         }
     })
 
@@ -220,15 +220,47 @@ export async function getProductById(req: Request, res: Response) {
 export async function getProductsByProducer(req: Request, res: Response) {
     const { producerId } = req.params
 
-    if(!producerId) return res.status(401).json({ messageError: 'You must be a logged' })
+    if (!producerId) return res.status(401).json({ messageError: 'You must be a logged' })
 
     const products = await prisma.product.findMany({
         where: {
             producerId
+        },
+        include: {
+            sales: {
+                include: {
+                    sales: true
+                }
+            }
         }
     })
 
-    return res.status(200).json(products)
+    const productsJson = JSON.stringify(products, toObject);
+    return res.status(200).json(JSON.parse(productsJson))
+}
+
+export async function deleteProductById(req: Request, res: Response) {
+    const { productId } = req.params
+    if (!productId) return res.status(400).json({ messageError: 'Invalid body' })
+
+    try {
+        await prisma.product.delete({
+            where: {
+                id: Number(productId)
+            }
+        })
+
+        return res.status(200).json({ message: 'Product deleted successfully' })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ error: 'Internal Server Error' })
+    }
+}
+
+export function toObject(key: string, value: any) {
+    return typeof value === 'bigint'
+        ? value.toString()
+        : value; // return everything else unchanged
 }
 
 
