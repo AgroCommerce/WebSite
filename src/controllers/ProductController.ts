@@ -6,13 +6,13 @@ import { getProducerId, getUserId } from '../utils/getHeaderData'
 
 //add update stock
 export async function registerProduct(req: Request, res: Response) {
-    const { description, title, price, quantity, keyWords, productCost, offer } = req.body as Product
+    const { description, title, price, quantity, keyWords, productCost, offer, imgUrl } = req.body as Product
     const userId = getUserId(req.headers)
 
     const apartWords = keyWords.split(',')
     if (!userId) return res.status(401).json({ messageError: 'You must be logged in to register a product' })
 
-    if (!description || !title || !price || !quantity || !keyWords || !productCost) return res.status(400).json({ error: 'All fields must be filled' })
+    if (!description || !title || !price || !quantity || !keyWords || !productCost || !imgUrl) return res.status(400).json({ error: 'All fields must be filled' })
     if (apartWords.length > 5 || apartWords.length < 3) return res.status(400).json({ error: 'KeyWords must have a maximum of 5 words and a minimum of 3' })
 
     try {
@@ -35,7 +35,7 @@ export async function registerProduct(req: Request, res: Response) {
                 price,
                 quantity,
                 keyWords,
-                imgUrl: 'teste',
+                imgUrl,
                 producerId,
                 productCost,
                 offer: offer ? offer : 0
@@ -44,38 +44,68 @@ export async function registerProduct(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'Product created successfully' })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
 
-export async function updateStock(req: Request, res: Response) {
-    const productId: Product['id'] = req.body.productId
-    const quantity: number = req.body.quantity
-    const producerId = getProducerId(req.headers)
-
-    if (!producerId) return res.status(401).json({ messageError: 'You must be logged in to update a product' })
-    if (!productId || !quantity) return res.status(400).json({ error: 'Invalid body' })
+export async function updateProduct(req: Request, res: Response) {
+    const { description, title, price, quantity, keyWords, productCost, offer, imgUrl } = req.body as Product
+    const userId = getUserId(req.headers)
+    const { productId } = req.params
+    if (!userId) return res.status(401).json({ messageError: 'You must be logged in to update a product' })
+    console.log(req.body)
+    console.log(req.params)
 
     try {
-        const product = await prisma.product.findUnique({
-            where: {
-                id: productId
-            }
-        })
+        const [user, product] = await Promise.all([
+            prisma.user.findUnique({
+                where: {
+                    id: userId
+                },
+                include: {
+                    producer: true
+                }
+            }),
+            prisma.product.findUnique({
+                where: {
+                    id: Number(productId)
+                }
+            })
+        ])
 
-        if (!product) return res.status(404).json({ error: 'Product not found' })
+        if(!user?.producer) return res.status(404).json({ error: 'You must be producer to update a product' })
 
-        await prisma.product.update({
-            where: {
-                id: productId
-            },
-            data: {
-                quantity: product.quantity + quantity
-            }
-        })
+        const oldDescription = product?.description as string,
+            oldTitle = product?.title as string,
+            oldPrice = product?.price as unknown as number,
+            oldQuantity = product?.quantity as unknown as number,
+            oldKeyWords = product?.keyWords as string,
+            oldImgUrl = product?.imgUrl as string[],
+            oldProductCost = product?.productCost as unknown as number,
+            oldOffer = product?.offer as unknown as number
 
-        return res.status(200).json({ message: 'Stock updated successfully' })
+        if (product) {
+            await prisma.product.update({
+                where: {
+                    id: Number(productId)
+                },
+                data: {
+                    description: description ? description : oldDescription,
+                    title: title ? title : oldTitle,
+                    price: price ? price : oldPrice,
+                    quantity: quantity ? quantity : oldQuantity,
+                    keyWords: keyWords ? keyWords : oldKeyWords,
+                    imgUrl: imgUrl ? imgUrl : oldImgUrl,
+                    productCost: productCost ? productCost : oldProductCost,
+                    offer: offer ? offer : oldOffer
+                }
+            })
+        }
+
+        return res.status(200).json({ message: 'Product updated successfully' })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
@@ -208,13 +238,18 @@ export async function getProductById(req: Request, res: Response) {
 
     if (!productId) return res.status(400).json({ messageError: 'Invalid body' })
 
-    const product = await prisma.product.findUnique({
-        where: {
-            id: Number(productId)
-        }
-    })
+    try {
+        console.log(productId)
+        const product = await prisma.product.findFirst({
+            where: {
+                id: Number(productId)
+            }
+        })
+        return res.status(200).json(product)
 
-    return res.status(200).json(product)
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' })
+    }
 }
 
 export async function getProductsByProducer(req: Request, res: Response) {
