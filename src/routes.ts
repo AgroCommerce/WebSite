@@ -18,13 +18,13 @@ route.put("/update/user", checkToken, updateUser)
 //route.delete("/remove/user", checkToken, deleteUser)
 
 //Rotas de produtos
-route.post("/register/product", checkToken, registerProduct);
+route.post("/register/product", checkToken, isProducer, registerProduct);
 route.get("/get/products", getProducts);
 route.get("/get/:producerId/products/", getProductsByProducer);
 route.get("/get/product/:productId", getProductById);
 route.put("/update/product/:productId", checkToken, isProducer, updateProduct);
 route.delete("/remove/product/:productId", checkToken, isProducer, deleteProductById);
-
+ 
 //Rotas de carrinho de produtores
 route.post("/register/producer", checkToken ,registerProducer);
 route.get("/get/producer", getProducerById);
