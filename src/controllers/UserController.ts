@@ -231,6 +231,19 @@ export async function removeLikedProducts(req: Request, res: Response) {
     }
 }
 
+export async function getInOfferProducts(req: Request, res: Response) {
+    const products = await prisma.product.findMany({
+        where: {
+            offer: {
+                gt: 0
+            }
+        }
+    })
+
+    const productsJson = JSON.stringify(products, toObject)
+    return res.status(200).json(JSON.parse(productsJson))
+}
+
 export async function getLikedProducts(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })

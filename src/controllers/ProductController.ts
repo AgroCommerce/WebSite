@@ -54,8 +54,7 @@ export async function updateProduct(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const { productId } = req.params
     if (!userId) return res.status(401).json({ messageError: 'You must be logged in to update a product' })
-    console.log(req.body)
-    console.log(req.params)
+    console.log("BODY", req.body)
 
     try {
         const [user, product] = await Promise.all([
