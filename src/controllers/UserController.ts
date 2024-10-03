@@ -240,6 +240,7 @@ export async function getInOfferProducts(req: Request, res: Response) {
         }
     })
 
+    console.log(products)
     const productsJson = JSON.stringify(products, toObject)
     return res.status(200).json(JSON.parse(productsJson))
 }
