@@ -158,7 +158,7 @@ export async function addLikedProducts(req: Request, res: Response) {
         if (!product) return res.status(404).json({ error: 'Product not found' })
         if (!user) return res.status(404).json({ error: 'User not found' })
 
-        const shoppingCart = await prisma.likedProducts.findFirst({
+        const likedProducts = await prisma.likedProducts.findFirst({
             where: {
                 productId,
                 AND: {
@@ -167,7 +167,7 @@ export async function addLikedProducts(req: Request, res: Response) {
             }
         })
 
-        if (!shoppingCart) {
+        if (!likedProducts) {
             await prisma.likedProducts.create({
                 data: {
                     userId: user.id,
@@ -217,14 +217,14 @@ export async function removeLikedProducts(req: Request, res: Response) {
             }
         })
 
-        if(!shoppingCart) return res.status(404).json({ error: 'Product not found in liked products' })
+        if (!shoppingCart) return res.status(404).json({ error: 'Product not found in liked products' })
 
         await prisma.likedProducts.delete({
             where: {
                 id: shoppingCart.id
             }
         })
-        
+
         return res.status(200).json({ message: 'Product removed from liked products' })
     } catch (error) {
         return res.status(500).json({ error: 'Internal Server Error' })
@@ -237,6 +237,9 @@ export async function getInOfferProducts(req: Request, res: Response) {
             offer: {
                 gt: 0
             }
+        }, 
+        include: {
+            LikedProducts: true,
         }
     })
 
@@ -292,7 +295,7 @@ export async function getProducerById(req: Request, res: Response) {
     })
 
     if (!producer) return res.status(404).json({ error: 'Producer not found' })
-    
+
     const producerJson = JSON.stringify(producer, toObject);
     return res.status(200).json(JSON.parse(producerJson))
 }
@@ -317,13 +320,13 @@ export async function updateUser(req: Request, res: Response) {
             }
         })
         if (!user) return res.status(404).json({ messageError: 'User not found' })
-        
-        if(email) {
-            if(!password) return res.status(400).json({ messageError: 'Invalid body' })
+
+        if (email) {
+            if (!password) return res.status(400).json({ messageError: 'Invalid body' })
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
         }
-       
+
         const OldName = user.name
         const OldCellphone = user.cellphone
         const OldGender = user.gender
