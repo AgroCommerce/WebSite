@@ -5,9 +5,10 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken';
 /*
 {
-  id: 'b6603c52-801c-4f3e-9df1-b0042019f727',
-  roles: 'PRODUCER',
-  iat: 1716426021
+    id: 'b6603c52-801c-4f3e-9df1-b0042019f727',
+    roles: 'PRODUCER',
+    producerId: 'b6603c52-801c-4f3e-9df1-b0042019f727',
+    iat: 1716426021
 }
 */
 
