@@ -73,7 +73,7 @@ export async function updateProduct(req: Request, res: Response) {
             })
         ])
 
-        if(!user?.producer) return res.status(404).json({ error: 'You must be producer to update a product' })
+        if(!user?.producer) return res.status(401).json({ error: 'You must be producer to update a product' })
 
         const oldDescription = product?.description as string,
             oldTitle = product?.title as string,
