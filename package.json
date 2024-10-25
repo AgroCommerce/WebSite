@@ -8,6 +8,7 @@
     "build": "tsup src --format esm",
     "dev": "tsx watch src/server.ts",
     "db:migrate": "prisma migrate dev",
+    "postinstall": "npx prisma generate",
     "db:studio": "prisma studio"
   },
   "keywords": [],
