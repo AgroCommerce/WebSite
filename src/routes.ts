@@ -13,7 +13,7 @@ route.post("/auth/login", login)
 
 //Rotas de usuário
 route.post("/user/register", registerUser);
-route.get("/get/user", getUserById)
+route.get("/get/user", checkToken ,getUserById)
 route.put("/update/user", checkToken, updateUser)
 //route.delete("/remove/user", checkToken, deleteUser)
 
@@ -36,6 +36,7 @@ route.delete("/remove/shoppingCart", checkToken, removeShoppingCart);
 
 //Rotas de adição de endereço, carrinho e produtos favoritos
 route.post("/add/address/", checkToken, addUserAddress) 
+route.get("/get/address", checkToken, getUserById)
 route.delete("/remove/address/:addressId", checkToken, deleteAddressById)
 
 //Rotas de produtos favoritos

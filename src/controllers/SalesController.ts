@@ -9,8 +9,10 @@ export async function endSale(req: Request, res: Response) {
     const paymentMethod = req.body.paymentMethod
     const userAddressId: number = req.body.userAddressId
     const quantity: Array<number> = req.body.quantity
+    const freight: number = req.body.freight
+    const discount: number = req.body.discount
 
-    if (!paymentMethod || !userAddressId || !quantity) return res.status(400).json({ error: 'Invalid body! ' })
+    if (!paymentMethod || !userAddressId || !quantity || !freight || !discount) return res.status(400).json({ error: 'Invalid body! ' })
     if (!userId) return res.status(401).json({ error: 'You must be logged in to complete a sale' })
     if (quantity.length === 0) return res.status(400).json({ error: 'Quantity is empty' })
 
@@ -72,7 +74,7 @@ export async function endSale(req: Request, res: Response) {
                 userId,
                 paymentMethod,
                 userAddressId,
-                total: totalValue,
+                total: totalValue + freight - discount,
                 products: {
                     create: products.map((product, index) => {
                         return {
