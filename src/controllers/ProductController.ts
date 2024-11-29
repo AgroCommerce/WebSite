@@ -73,7 +73,7 @@ export async function updateProduct(req: Request, res: Response) {
             })
         ])
 
-        if(!user?.producer) return res.status(401).json({ error: 'You must be producer to update a product' })
+        if (!user?.producer) return res.status(401).json({ error: 'You must be producer to update a product' })
 
         const oldDescription = product?.description as string,
             oldTitle = product?.title as string,
@@ -228,13 +228,20 @@ export async function getShoppingCart(req: Request, res: Response) {
 }
 
 export async function getProducts(req: Request, res: Response) {
-    const products = await prisma.product.findMany({
-        include: {
-            LikedProducts: true,
-            producer: true
-        }
-    })
-    return res.status(200).json(products)
+    try {
+        const products = await prisma.product.findMany({
+            include: {
+                LikedProducts: true,
+                producer: true
+            }
+        })
+
+        console.log(products)
+        const productsJson = JSON.stringify(products, toObject);
+        return res.status(200).json(JSON.parse(productsJson))
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' })
+    }
 }
 
 export async function getProductById(req: Request, res: Response) {
