@@ -230,7 +230,8 @@ export async function getShoppingCart(req: Request, res: Response) {
 export async function getProducts(req: Request, res: Response) {
     const products = await prisma.product.findMany({
         include: {
-            LikedProducts: true
+            LikedProducts: true,
+            producer: true
         }
     })
     return res.status(200).json(products)

@@ -100,6 +100,7 @@ model Product {
   productCost Decimal  @map("custo-produto")
   offer       Decimal? @default(0.00) @map("oferta")
   keyWords    String   @map("palavras-chaves")
+  starRating  Int      @default(0) @map("avaliacao")
   imgUrl      String[] @map("url-imagem")
   createdAt   DateTime @default(now()) @map("criado-em")
   producerId  String   @map("produtor_id")
