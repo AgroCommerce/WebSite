@@ -2,7 +2,7 @@ import express from 'express';
 const route = express.Router();
 
 import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById, removeLikedProducts, getLikedProducts, getProducerById, getInOfferProducts } from './controllers/UserController';
-import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, deleteProductById, updateProduct } from './controllers/ProductController';
+import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, deleteProductById, updateProduct, getAllProductsWithNoPagination } from './controllers/ProductController';
 import { login } from './controllers/LoginController';
 import { endSale, getSalesByProductId, getSalesUser } from './controllers/SalesController'; // Change the import statement to use default import syntax
 
@@ -20,6 +20,7 @@ route.put("/update/user", checkToken, updateUser)
 //Rotas de produtos
 route.post("/register/product", checkToken, isProducer, registerProduct);
 route.get("/get/products", getProducts);
+route.get("/get/products/noPagination", getAllProductsWithNoPagination);
 route.get("/get/:producerId/products/", getProductsByProducer);
 route.get("/get/product/:productId", getProductById);
 route.put("/update/product/:productId", checkToken, isProducer, updateProduct);

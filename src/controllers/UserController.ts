@@ -306,7 +306,6 @@ export function toObject(key: string, value: any) {
         : value; // return everything else unchanged
 }
 
-//colocar para alterar email somente com senha
 export async function updateUser(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const { cellphone, gender, name, email, password } = req.body as User
@@ -317,7 +316,7 @@ export async function updateUser(req: Request, res: Response) {
         const user = await prisma.user.findUnique({
             where: {
                 id: userId
-            }
+            },
         })
         if (!user) return res.status(404).json({ messageError: 'User not found' })
 

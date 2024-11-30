@@ -227,18 +227,45 @@ export async function getShoppingCart(req: Request, res: Response) {
     return res.status(200).json(shoppingCart)
 }
 
-export async function getProducts(req: Request, res: Response) {
+export async function getAllProductsWithNoPagination(req: Request, res: Response) {
     try {
-        const products = await prisma.product.findMany({
-            include: {
-                LikedProducts: true,
-                producer: true
-            }
-        })
-
-        console.log(products)
+        const products = await prisma.product.findMany()
         const productsJson = JSON.stringify(products, toObject);
         return res.status(200).json(JSON.parse(productsJson))
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' })
+    }
+}
+
+export async function getProducts(req: Request, res: Response) {
+    const page = req.query.page as unknown as number
+    console.log(page)
+
+    try {
+        const [count, products] = await prisma.$transaction([
+            prisma.product.count(),
+            prisma.product.findMany({
+                take: 10,
+                skip: page * 10 || 0,
+                include: {
+                    LikedProducts: true,
+                    producer: true
+                }
+            })
+        ])
+        
+        const productsJson = JSON.stringify(products, toObject);
+        const pages = Math.ceil(count / 10)
+
+        const returnApi = {
+            data: JSON.parse(productsJson),
+            info: {
+                pages,
+                count,
+                haveNextPage: page + 1 >= pages ? false : true
+            }
+        }
+        return res.status(200).json(returnApi)
     } catch (error) {
         return res.status(500).json({ error: 'Internal Server Error' })
     }
