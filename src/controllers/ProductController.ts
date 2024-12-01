@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { Product } from "@prisma/client";
-import { prisma } from '../lib/prisma'
+import { prisma } from '../lib/prisma.js'
 
-import { getProducerId, getUserId } from '../utils/getHeaderData'
+import { getProducerId, getUserId } from '../utils/getHeaderData.js'
+import Fuse from 'fuse.js'
 
 //add update stock
 export async function registerProduct(req: Request, res: Response) {
@@ -229,8 +230,15 @@ export async function getShoppingCart(req: Request, res: Response) {
 
 export async function getAllProductsWithNoPagination(req: Request, res: Response) {
     try {
-        const products = await prisma.product.findMany()
-        const productsJson = JSON.stringify(products, toObject);
+        const productsNoPag = await prisma.product.findMany({
+            include: {
+                LikedProducts: true,
+                producer: true
+            }
+        })
+
+        console.log(productsNoPag)
+        const productsJson = JSON.stringify(productsNoPag, toObject);
         return res.status(200).json(JSON.parse(productsJson))
     } catch (error) {
         return res.status(500).json({ error: 'Internal Server Error' })
@@ -239,30 +247,42 @@ export async function getAllProductsWithNoPagination(req: Request, res: Response
 
 export async function getProducts(req: Request, res: Response) {
     const page = req.query.page as unknown as number
-    console.log(page)
+    const search = req.params.search
+    const limit = 10
 
     try {
-        const [count, products] = await prisma.$transaction([
-            prisma.product.count(),
-            prisma.product.findMany({
-                take: 10,
-                skip: page * 10 || 0,
-                include: {
-                    LikedProducts: true,
-                    producer: true
-                }
-            })
-        ])
-        
-        const productsJson = JSON.stringify(products, toObject);
-        const pages = Math.ceil(count / 10)
+        const products = await prisma.product.findMany({
+            include: {
+                LikedProducts: true,
+                producer: true
+            },
+            orderBy: { createdAt: 'desc' },
+        })
+
+        const fuse = new Fuse(products, {
+            keys: ['title', 'description', 'keyWords'], // Campos de busca
+            threshold: 0.3, // Controle de proximidade (0 = exato, 1 = amplo)
+        });
+
+        const filteredProducts = search
+            ? fuse.search(search as string).map((result) => result.item)
+            : products;
+
+        const startIndex = (page - 1) * limit;
+        const paginatedProducts = filteredProducts.slice(
+            startIndex,
+            startIndex + limit
+        );
+
+        const productsJson = JSON.stringify(paginatedProducts, toObject);
+        const pages = Math.ceil(filteredProducts.length / 10)
 
         const returnApi = {
             data: JSON.parse(productsJson),
             info: {
                 pages,
-                count,
-                haveNextPage: page + 1 >= pages ? false : true
+                count: filteredProducts.length,
+                haveNextPage: startIndex + limit < filteredProducts.length,
             }
         }
         return res.status(200).json(returnApi)

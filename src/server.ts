@@ -4,7 +4,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 
-import route from './routes'
+import route from './routes.js'
 
 const app = express();
 

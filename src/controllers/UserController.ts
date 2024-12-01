@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { User, Producer, UserAddress, Product, Role } from "@prisma/client";
-import { prisma } from '../lib/prisma'
-import { CpfCnpjUtils } from '../utils/validator'
+import { prisma } from '../lib/prisma.js'
+import { CpfCnpjUtils } from '../utils/validator.js'
 
-import { getUserId } from '../utils/getHeaderData'
+import { getUserId } from '../utils/getHeaderData.js'
 import bcrypt from 'bcryptjs'
 
 // post

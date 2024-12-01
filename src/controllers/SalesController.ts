@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
-import { prisma } from "../lib/prisma"
+import { prisma } from "../lib/prisma.js"
 
-import { getUserId } from "../utils/getHeaderData"
+import { getUserId } from "../utils/getHeaderData.js"
 import { Decimal } from "@prisma/client/runtime/library"
 
 export async function endSale(req: Request, res: Response) {

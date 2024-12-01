@@ -1,12 +1,12 @@
 import express from 'express';
 const route = express.Router();
 
-import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById, removeLikedProducts, getLikedProducts, getProducerById, getInOfferProducts } from './controllers/UserController';
-import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, deleteProductById, updateProduct, getAllProductsWithNoPagination } from './controllers/ProductController';
-import { login } from './controllers/LoginController';
-import { endSale, getSalesByProductId, getSalesUser } from './controllers/SalesController'; // Change the import statement to use default import syntax
+import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById, removeLikedProducts, getLikedProducts, getProducerById, getInOfferProducts } from './controllers/UserController.js';
+import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, deleteProductById, updateProduct, getAllProductsWithNoPagination } from './controllers/ProductController.js';
+import { login } from './controllers/LoginController.js';
+import { endSale, getSalesByProductId, getSalesUser } from './controllers/SalesController.js'; // Change the import statement to use default import syntax
 
-import { checkToken, isProducer } from './middlewares/AuthToken';
+import { checkToken, isProducer } from './middlewares/AuthToken.js';
 
 //rota de login
 route.post("/auth/login", login)
@@ -19,9 +19,9 @@ route.put("/update/user", checkToken, updateUser)
 
 //Rotas de produtos
 route.post("/register/product", checkToken, isProducer, registerProduct);
-route.get("/get/products", getProducts);
-route.get("/get/products/noPagination", getAllProductsWithNoPagination);
-route.get("/get/:producerId/products/", getProductsByProducer);
+route.get("/get/products/:search", getProducts);
+route.get("/get/productsNoPagination", getAllProductsWithNoPagination);
+route.get("/get/:producerId/products", getProductsByProducer);
 route.get("/get/product/:productId", getProductById);
 route.put("/update/product/:productId", checkToken, isProducer, updateProduct);
 route.delete("/remove/product/:productId", checkToken, isProducer, deleteProductById);
@@ -36,7 +36,7 @@ route.get("/get/shoppingCart", checkToken, getShoppingCart);
 route.delete("/remove/shoppingCart", checkToken, removeShoppingCart);
 
 //Rotas de adição de endereço, carrinho e produtos favoritos
-route.post("/add/address/", checkToken, addUserAddress) 
+route.post("/add/address", checkToken, addUserAddress) 
 route.get("/get/address", checkToken, getUserById)
 route.delete("/remove/address/:addressId", checkToken, deleteAddressById)
 
