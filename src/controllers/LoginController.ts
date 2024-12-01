@@ -40,11 +40,8 @@ export async function login(req: Request, res: Response) {
             secure: process.env.NODE_ENV !== 'development',
             path: '/',
         })
-
-        console.log(token)
         return res.status(200).send({ message: "Authentication completed successfully" })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }

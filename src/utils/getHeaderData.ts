@@ -25,6 +25,5 @@ export function getProducerId(headers: any) {
     if (!token) return undefined
 
     const decoded = jwt.decode(token) as Cookie
-    console.log(decoded, 'decoded')
     return decoded.producerId
 }

@@ -45,7 +45,6 @@ export async function registerProduct(req: Request, res: Response) {
 
         return res.status(201).json({ message: 'Product created successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
@@ -55,7 +54,6 @@ export async function updateProduct(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const { productId } = req.params
     if (!userId) return res.status(401).json({ messageError: 'You must be logged in to update a product' })
-    console.log("BODY", req.body)
 
     try {
         const [user, product] = await Promise.all([
@@ -105,7 +103,6 @@ export async function updateProduct(req: Request, res: Response) {
 
         return res.status(200).json({ message: 'Product updated successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
@@ -237,7 +234,6 @@ export async function getAllProductsWithNoPagination(req: Request, res: Response
             }
         })
 
-        console.log(productsNoPag)
         const productsJson = JSON.stringify(productsNoPag, toObject);
         return res.status(200).json(JSON.parse(productsJson))
     } catch (error) {
@@ -297,7 +293,6 @@ export async function getProductById(req: Request, res: Response) {
     if (!productId) return res.status(400).json({ messageError: 'Invalid body' })
 
     try {
-        console.log(productId)
         const product = await prisma.product.findFirst({
             where: {
                 id: Number(productId)
@@ -345,7 +340,6 @@ export async function deleteProductById(req: Request, res: Response) {
 
         return res.status(200).json({ message: 'Product deleted successfully' })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 }

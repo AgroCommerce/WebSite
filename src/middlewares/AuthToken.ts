@@ -11,10 +11,7 @@ import jwt, { Secret, JwtPayload } from 'jsonwebtoken'
 
 export const checkToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['authorization'] as string
-    console.log(authHeader, "authHeader")
     const token = authHeader && authHeader.split(' ')[1]
-
-    console.log("Tooken", jwt.decode(token))
 
     if (!token) return res.status(401).json({ messageError: 'Unauthorized' })
 
@@ -35,7 +32,6 @@ export function isProducer(req: Request, res:Response ,next:NextFunction) {
     if (!token) return res.status(401).json({ messageError: 'Unauthorized' })
 
     const decodedToken = jwt.decode(token) as JwtPayload
-    console.log(decodedToken, "decode auth")
     if (decodedToken.role !== 'PRODUCER') return res.status(401).json({ messageError: 'Unauthorized, you must to be a PRODUCER' })
 
     next()

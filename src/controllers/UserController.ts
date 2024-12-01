@@ -243,7 +243,6 @@ export async function getInOfferProducts(req: Request, res: Response) {
         }
     })
 
-    console.log(products)
     const productsJson = JSON.stringify(products, toObject)
     return res.status(200).json(JSON.parse(productsJson))
 }
@@ -309,7 +308,6 @@ export function toObject(key: string, value: any) {
 export async function updateUser(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const { cellphone, gender, name, email, password } = req.body as User
-    console.log(req.body)
     if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
 
     try {
@@ -345,7 +343,6 @@ export async function updateUser(req: Request, res: Response) {
 
         return res.status(200).json({ message: 'User updated successfully' })
     } catch (err) {
-        console.log(err)
         return res.status(500).json({ messageError: 'iInternal Server Error' })
     }
 }
