@@ -45,6 +45,41 @@ export async function registerUser(req: Request, res: Response) {
     }
 }
 
+export async function deleteUser(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+    const { password } = req.body
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        })
+
+        if (!user) return res.status(404).json({ messageError: 'User not found' })
+        if (!password) return res.status(400).json({ messageError: 'Invalid body' })
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
+
+        await prisma.user.delete({
+            where: {
+                id: userId
+            }, include: {
+                producer: true,
+                likedProducts: true,
+                sales: true,
+                shoppingCart: true,
+                userAddress: true
+            }
+        })
+
+        return res.status(200).json({ message: 'User deleted successfully' })
+    } catch (error) {
+        return res.status(500).json({ messageError: 'Internal Server Error' })
+    }
+}
+
 export async function registerProducer(req: Request, res: Response) {
     const { cnpj, companyName, telephone } = req.body as Producer
     const userId = getUserId(req.headers)
@@ -237,7 +272,7 @@ export async function getInOfferProducts(req: Request, res: Response) {
             offer: {
                 gt: 0
             }
-        }, 
+        },
         include: {
             LikedProducts: true,
         }
