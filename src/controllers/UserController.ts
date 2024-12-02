@@ -81,7 +81,7 @@ export async function deleteUser(req: Request, res: Response) {
 }
 
 export async function registerProducer(req: Request, res: Response) {
-    const { cnpj, companyName, telephone } = req.body as Producer
+    const { cnpj, companyName, telephone, password } = req.body as { cnpj: number, companyName: string, telephone: number, password: string }
     const userId = getUserId(req.headers)
 
     if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
@@ -99,6 +99,8 @@ export async function registerProducer(req: Request, res: Response) {
         })
         if (!user) return res.status(404).json({ messageError: 'User not found' })
         if (user.producer) return res.status(409).json({ messageError: 'User already is a producer' })
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
 
         await prisma.producer.create({
             data: {
