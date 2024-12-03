@@ -438,6 +438,54 @@ export async function updateUser(req: Request, res: Response) {
     }
 }
 
+export async function updateAddress(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    const { cep, address, city, country, district, state, numberAddress, receiverName, typeAddress } = req.body as UserAddress
+
+    if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+        
+    try {
+        const userAddressFind = await prisma.userAddress.findFirst({
+            where: {
+                userId
+            }
+        })
+        if (!userAddressFind) return res.status(404).json({ messageError: 'Address not found' })
+
+        const oldCep = userAddressFind.cep || 0
+        const oldCity = userAddressFind.city || ''
+        const oldCountry = userAddressFind.country || ''
+        const oldDistrict = userAddressFind.district || ''
+        const oldState = userAddressFind.state || ''
+        const oldNumberAddress = userAddressFind.numberAddress || 0
+        const oldReceiverName = userAddressFind.receiverName || ''
+        const oldTypeAddress = userAddressFind.typeAddress || ''
+        const oldAddress = userAddressFind.address || ''
+
+
+        await prisma.userAddress.update({
+            where: {
+                id: userAddressFind.id
+            },
+            data: {
+                cep: cep ? cep : oldCep,
+                city: city ? city : oldCity,
+                country: country ? country : oldCountry,
+                district: district ? district : oldDistrict,
+                state: state ? state : oldState,
+                numberAddress: numberAddress ? numberAddress : oldNumberAddress,
+                receiverName: receiverName ? receiverName : oldReceiverName,
+                typeAddress : typeAddress ? typeAddress : oldTypeAddress,
+                address: address ? address : oldAddress
+            }
+        })
+
+        return res.status(200).json({ message: 'Address updated successfully' })
+    } catch (error) {
+        return res.status(500).json({ messageError: 'Internal Server Error' })
+    }
+}
+
 export async function deleteAddressById(req: Request, res: Response) {
     const userId = getUserId(req.headers)
     const addressId = Number(req.params.addressId)

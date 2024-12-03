@@ -1,7 +1,7 @@
 import express from 'express';
 const route = express.Router();
 
-import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById, removeLikedProducts, getLikedProducts, getProducerById, getInOfferProducts, deleteUser, changePassword } from './controllers/UserController.js';
+import { addUserAddress, registerUser, registerProducer, addLikedProducts, getUserById, updateUser, deleteAddressById, removeLikedProducts, getLikedProducts, getProducerById, getInOfferProducts, deleteUser, changePassword, updateAddress } from './controllers/UserController.js';
 import { registerProduct, addShoppingCart, getProductById, getProducts, getProductsByProducer, getShoppingCart, removeShoppingCart, deleteProductById, updateProduct, getAllProductsWithNoPagination } from './controllers/ProductController.js';
 import { login } from './controllers/LoginController.js';
 import { endSale, getSalesByProductId, getSalesUser } from './controllers/SalesController.js'; // Change the import statement to use default import syntax
@@ -39,6 +39,7 @@ route.delete("/remove/shoppingCart", checkToken, removeShoppingCart);
 //Rotas de adição de endereço, carrinho e produtos favoritos
 route.post("/add/address", checkToken, addUserAddress) 
 route.get("/get/address", checkToken, getUserById)
+route.put("/update/address", checkToken, updateAddress)
 route.delete("/remove/address/:addressId", checkToken, deleteAddressById)
 
 //Rotas de produtos favoritos
