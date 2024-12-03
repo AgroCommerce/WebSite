@@ -265,8 +265,6 @@ export async function getProducts(req: Request, res: Response) {
             ? fuse.search(search as string).map((result) => result.item)
             : products;
 
-        console.log("Antes do switch", filteredProducts)
-
         switch (filter) {
             case 'price': // Ordenar por preço crescente
                 filteredProducts.sort((a, b) => ((Number(a.price) - (Number(a.price) * (Number(a.offer) ?? 0))) - (Number(b.price) - (Number(b.price) * (Number(b.offer) ?? 0)))));
@@ -283,8 +281,6 @@ export async function getProducts(req: Request, res: Response) {
             default:
                 break;
         }
-
-        console.log("Depois do switch", filteredProducts)
 
         const startIndex = (page - 1) * limit;
         const paginatedProducts = filteredProducts.slice(
