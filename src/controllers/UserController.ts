@@ -80,6 +80,46 @@ export async function deleteUser(req: Request, res: Response) {
     }
 }
 
+export async function changePassword(req: Request, res: Response) {
+    const userId = getUserId(req.headers)
+    const { oldPassword, newPassword } = req.body
+
+    if (!userId) return res.status(401).json({ messageError: 'You must to be a logged' })
+    if (!oldPassword || !newPassword) return res.status(400).json({ messageError: 'Invalid body' })
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        })
+
+        if (!user) return res.status(404).json({ messageError: 'User not found' })
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                password: hashedPassword
+            }
+        })
+
+        return res.status(200).json({ message: 'Password changed successfully' })
+    } catch (error) {
+        return res.status(500).json({ messageError: 'Internal Server Error' })
+    }
+}
+
+interface RegisterProducer {
+    user: User,
+    producer: Producer
+}
+
 export async function registerProducer(req: Request, res: Response) {
     const { cnpj, companyName, telephone, password } = req.body as { cnpj: number, companyName: string, telephone: number, password: string }
     const userId = getUserId(req.headers)
@@ -91,41 +131,55 @@ export async function registerProducer(req: Request, res: Response) {
     if (typeof cnpj !== 'number') return res.status(401).json({ messageError: 'CNPJ must to be a number' })
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: userId, },
-            include: {
-                producer: true
-            }
-        })
+        const [user, producer] = await Promise.all([
+            prisma.user.findUnique({
+                where: {
+                    id: userId
+                }, include: {
+                    producer: true
+                }
+            }),
+            prisma.producer.findFirst({
+                where: {
+                    cnpj
+                }
+            })
+        ]);
+
         if (!user) return res.status(404).json({ messageError: 'User not found' })
         if (user.producer) return res.status(409).json({ messageError: 'User already is a producer' })
+        if (producer) return res.status(409).json({ messageError: 'Producer already exists' })
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ messageError: 'Invalid password' })
 
-        await prisma.producer.create({
-            data: {
-                cnpj,
-                companyName,
-                telephone,
-                user: {
-                    connect: {
-                        id: user.id,
+        await Promise.all([
+            prisma.producer.create({
+                data: {
+                    cnpj,
+                    companyName,
+                    telephone,
+                    user: {
+                        connect: {
+                            id: user.id,
+                        }
+                    }
+                }
+            }),
+
+            prisma.user.update({
+                where: { id: userId },
+                data: {
+                    role: {
+                        set: 'PRODUCER'
                     }
                 }
             }
-        })
-
-        await prisma.user.update({
-            where: { id: userId },
-            data: {
-                role: {
-                    set: 'PRODUCER'
-                }
-            }
-        })
+            )
+        ])
 
         return res.status(201).json({ message: 'Producer created successfully' })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ messageError: 'Internal Server Error' })
     }
 }
