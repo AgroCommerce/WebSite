@@ -243,6 +243,7 @@ export async function getAllProductsWithNoPagination(req: Request, res: Response
 
 export async function getProducts(req: Request, res: Response) {
     const page = req.query.page as unknown as number
+    const filter = req.query.filter as string
     const search = req.params.search
     const limit = 10
 
@@ -263,6 +264,27 @@ export async function getProducts(req: Request, res: Response) {
         const filteredProducts = search
             ? fuse.search(search as string).map((result) => result.item)
             : products;
+
+        console.log("Antes do switch", filteredProducts)
+
+        switch (filter) {
+            case 'price': // Ordenar por preço crescente
+                filteredProducts.sort((a, b) => ((Number(a.price) - (Number(a.price) * (Number(a.offer) ?? 0))) - (Number(b.price) - (Number(b.price) * (Number(b.offer) ?? 0)))));
+                break;
+            case 'offers': // Ordenar por ofertas crescente
+                filteredProducts.sort((a, b) => (Number(a.offer) ?? 0) - (Number(b.offer) ?? 0)).reverse();
+                break;
+            case 'az': // Ordenar por título (A-Z)
+                filteredProducts.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+            case 'za': // Ordenar por título (Z-A)
+                filteredProducts.sort((a, b) => b.title.localeCompare(a.title));
+                break;
+            default:
+                break;
+        }
+
+        console.log("Depois do switch", filteredProducts)
 
         const startIndex = (page - 1) * limit;
         const paginatedProducts = filteredProducts.slice(
